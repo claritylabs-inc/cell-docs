@@ -3,13 +3,80 @@ title: Changelog
 description: Release history for @claritylabs-inc/cell
 ---
 
+All notable changes to `@claritylabs-inc/cell` are documented here.
 
 ## v0.2.5 — 2026-03-16
 
-This release adds customization options to the `AgentContext` interface, allowing developers to configure the AI agent's display name and provide custom link guidance for improved document linking behavior.
+CI pipeline fix for the docs repo dispatch workflow.
+
+### Changed
+
+- Updated `publish.yml` to use GitHub App tokens for cross-repo dispatch
+
+## v0.2.4 — 2026-03-16
+
+Agent name is now configurable instead of being hardcoded.
+
+### Changed
+
+- `AgentContext.agentName` is now optional — defaults to `"Cell Agent"` if not set, replacing the previously hardcoded `"Clarity Agent"`
+
+## v0.2.3 — 2026-03-16
+
+Document link guidance in agent prompts is now configurable.
 
 ### Added
 
-- `agentName?: string` to `AgentContext` — Display name for the AI agent. Defaults to "Cell Agent" if not set.
-- `linkGuidance?: string` to `AgentContext` — Custom link guidance for the AI. Replaces the default policy/quote link examples. Should include markdown link examples showing the AI how to format document links. Only used when the platform supports links and intent is "direct".
-All notable changes to `@claritylabs-inc/cell` will be documented here. This page is automatically updated when new versions are published.
+- `AgentContext.linkGuidance` — optional custom link guidance string for agent prompts, replacing hardcoded policy/quote link examples
+
+## v0.2.2 — 2026-03-15
+
+CI fix for semantic-release permissions.
+
+### Changed
+
+- Added `issues` and `pull-requests` write permissions to the publish workflow for semantic-release
+
+## v0.2.1 — 2026-03-15
+
+CI fix for Node.js version compatibility.
+
+### Changed
+
+- Bumped Node.js version to 22 in CI for semantic-release v25 compatibility
+
+## v0.2.0 — 2026-03-15
+
+Major refactor: provider-agnostic models, composable agent prompts, and a restructured type system.
+
+### Added
+
+- Provider-agnostic extraction pipeline via Vercel AI SDK `LanguageModel` instances (replaces hardcoded Anthropic)
+- Composable agent prompt modules (`buildAgentSystemPrompt`, `buildIdentityPrompt`, `buildIntentPrompt`, `buildFormattingPrompt`, `buildSafetyPrompt`, `buildCoverageGapPrompt`, `buildCoiRoutingPrompt`, `buildCustomerPoliciesPrompt`)
+- Platform and intent model (`AgentPlatform`, `AgentIntent`)
+- Agent tool definitions (`getAgentTools`)
+- Structured type system with `ExtractionResult`, `ClassificationResult`, `ApplicationResult`
+- Automated versioning via semantic-release
+
+### Changed
+
+- Models are now passed as `LanguageModel` instances instead of string identifiers
+- Agent prompt generation is now composable — individual modules can be used independently
+- Type exports reorganized under structured namespaces
+
+## v0.1.1 — 2026-03-14
+
+Patch release with no functional changes.
+
+## v0.1.0 — 2026-03-14
+
+Initial release of `@claritylabs-inc/cell`.
+
+### Added
+
+- Document classification (`classifyDocumentType`)
+- PDF extraction pipeline (`extractFromPdf`, `extractQuoteFromPdf`)
+- Application result processing
+- PDF operations (merge, split, extract pages)
+- TypeScript type definitions for insurance domain models
+- GitHub Packages publishing via CI
