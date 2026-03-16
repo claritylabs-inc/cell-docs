@@ -3,4 +3,13 @@ title: Changelog
 description: Release history for @claritylabs-inc/cell
 ---
 
+
+## v0.2.5 — 2026-03-16
+
+This release adds customization options to the `AgentContext` interface, allowing developers to configure the AI agent's display name and provide custom link guidance for improved document linking behavior.
+
+### Added
+
+- `agentName?: string` to `AgentContext` — Display name for the AI agent. Defaults to "Cell Agent" if not set.
+- `linkGuidance?: string` to `AgentContext` — Custom link guidance for the AI. Replaces the default policy/quote link examples. Should include markdown link examples showing the AI how to format document links. Only used when the platform supports links and intent is "direct".
 All notable changes to `@claritylabs-inc/cell` will be documented here. This page is automatically updated when new versions are published.
