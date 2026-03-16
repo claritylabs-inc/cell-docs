@@ -1,0 +1,68 @@
+---
+title: Applying Results
+description: Map raw extraction output to structured, persistence-ready fields
+---
+
+The extraction pipeline returns raw JSON from the AI model. The `applyExtracted` and `applyExtractedQuote` functions normalize this into clean, typed fields ready for persistence.
+
+## Policies
+
+```typescript
+import { extractFromPdf, applyExtracted } from "@claritylabs-inc/cell";
+
+const { extracted } = await extractFromPdf(pdfBase64);
+const fields = applyExtracted(extracted);
+```
+
+### Output fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `carrier` | `string` | Insurance carrier name |
+| `security` | `string?` | Security/surplus lines carrier |
+| `underwriter` | `string?` | Underwriter name |
+| `mga` | `string?` | Managing General Agent |
+| `broker` | `string?` | Broker name |
+| `policyNumber` | `string` | Policy number |
+| `policyTypes` | `string[]` | Types (e.g., `["General Liability"]`) |
+| `documentType` | `"policy" \| "quote"` | Document type |
+| `policyYear` | `number` | Policy year |
+| `effectiveDate` | `string` | Policy effective date |
+| `expirationDate` | `string` | Policy expiration date |
+| `isRenewal` | `boolean` | Whether this is a renewal |
+| `coverages` | `Coverage[]` | Coverage details with limits |
+| `premium` | `string?` | Total premium |
+| `insuredName` | `string` | Name of the insured |
+| `summary` | `string?` | AI-generated summary |
+| `metadataSource` | `object?` | Raw metadata from pass 1 |
+| `document` | `object?` | Sections and supplementary data from pass 2-3 |
+| `extractionStatus` | `"complete"` | Always `"complete"` |
+| `extractionError` | `""` | Always empty string |
+
+## Quotes
+
+```typescript
+import { extractQuoteFromPdf, applyExtractedQuote } from "@claritylabs-inc/cell";
+
+const { extracted } = await extractQuoteFromPdf(pdfBase64);
+const fields = applyExtractedQuote(extracted);
+```
+
+### Additional quote fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `quoteNumber` | `string` | Quote number |
+| `quoteYear` | `number` | Quote year |
+| `proposedEffectiveDate` | `string?` | Proposed effective date |
+| `proposedExpirationDate` | `string?` | Proposed expiration date |
+| `quoteExpirationDate` | `string?` | When the quote expires |
+| `premiumBreakdown` | `PremiumLine[]?` | Line-by-line premium |
+| `subjectivities` | `Subjectivity[]?` | Binding conditions |
+| `underwritingConditions` | `UnderwritingCondition[]?` | Carrier requirements |
+
+Quote coverages use `proposedLimit` and `proposedDeductible` instead of `limit` and `deductible`.
+
+## Null handling
+
+Both functions use `sanitizeNulls` internally to convert `null` values to `undefined`. This is required for frameworks like Convex that reject `null` for optional fields. All coverages, metadata sources, and document sections are sanitized recursively.

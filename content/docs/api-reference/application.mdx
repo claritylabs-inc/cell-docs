@@ -1,0 +1,104 @@
+---
+title: Application API
+description: Complete reference for application processing prompt builders
+---
+
+All application processing functions are prompt builders — they return prompt strings for use with any LLM.
+
+## Detection
+
+### `APPLICATION_CLASSIFY_PROMPT`
+
+A static prompt string for classifying whether a PDF is an insurance application form.
+
+```typescript
+import { APPLICATION_CLASSIFY_PROMPT } from "@claritylabs-inc/cell";
+```
+
+## Field extraction
+
+### `buildFieldExtractionPrompt()`
+
+Build a prompt to extract all fillable fields from an application PDF as structured data.
+
+**Returns:** `string`
+
+**Field types:** `text`, `numeric`, `currency`, `date`, `yes_no`, `table`, `declaration`
+
+## Auto-fill
+
+### `buildAutoFillPrompt(fields, businessContext)`
+
+Build a prompt to match extracted fields against known business context for auto-filling.
+
+**Returns:** `string`
+
+## Question batching
+
+### `buildQuestionBatchPrompt(unfilledFields)`
+
+Build a prompt to organize unfilled fields into topic-based batches for user interaction.
+
+**Returns:** `string`
+
+## Answer parsing
+
+### `buildAnswerParsingPrompt(questions, userReply)`
+
+Build a prompt to parse free-text user replies into structured field values.
+
+**Returns:** `string`
+
+## Email generation
+
+### `buildBatchEmailGenerationPrompt(batch, context)`
+
+Build a prompt to generate an email asking users for missing application information.
+
+**Returns:** `string`
+
+## Reply classification
+
+### `buildReplyIntentClassificationPrompt(userReply, currentBatch)`
+
+Build a prompt to classify user reply intent (answering questions, asking for help, etc.).
+
+**Returns:** `string`
+
+## Field explanation
+
+### `buildFieldExplanationPrompt(field)`
+
+Build a prompt to generate a human-readable explanation of a complex insurance form field.
+
+**Returns:** `string`
+
+## Confirmation
+
+### `buildConfirmationSummaryPrompt(filledFields)`
+
+Build a prompt to generate a summary of all filled fields for user review before PDF generation.
+
+**Returns:** `string`
+
+## PDF mapping
+
+### `buildAcroFormMappingPrompt(filledFields, acroFormFields)`
+
+Build a prompt to map filled field values to AcroForm field names in a fillable PDF.
+
+**Returns:** `string`
+
+### `buildFlatPdfMappingPrompt(filledFields, pageInfo)`
+
+Build a prompt to map filled field values to percentage-based page coordinates for flat PDF overlay.
+
+**Returns:** `string`
+
+## Lookup fill
+
+### `buildLookupFillPrompt(fields, documents)`
+
+Build a prompt to fill fields by looking up values from existing insurance documents.
+
+**Returns:** `string`

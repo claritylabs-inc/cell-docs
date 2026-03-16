@@ -1,0 +1,122 @@
+---
+title: Model Configuration
+description: Configure which AI models run each pipeline pass
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Tab, Tabs } from "fumadocs-ui/components/tabs";
+
+Cell's extraction pipeline uses different models for different passes. You can use the defaults, a single model for everything, or assign models per role.
+
+## Default configuration
+
+If you don't pass a `models` option, Cell uses Anthropic defaults via `createDefaultModelConfig()`:
+
+| Role | Default Model | Purpose |
+|------|--------------|---------|
+| `classification` | Claude Haiku 4.5 | Fast document type detection |
+| `metadata` | Claude Sonnet 4.6 | Accurate metadata extraction |
+| `sections` | Claude Haiku 4.5 | Chunked section extraction |
+| `sectionsFallback` | Claude Sonnet 4.6 | Retry when sections truncate |
+| `enrichment` | Claude Haiku 4.5 | Supplementary field parsing |
+
+<Callout type="info">
+  Default models require `@ai-sdk/anthropic` as a peer dependency. It's lazy-imported — consumers using other providers never need it installed.
+</Callout>
+
+## Uniform model
+
+Use the same model for every pass:
+
+```typescript
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { extractFromPdf, createUniformModelConfig } from "@claritylabs-inc/cell";
+
+const anthropic = createAnthropic();
+const { extracted } = await extractFromPdf(pdfBase64, {
+  models: createUniformModelConfig(anthropic("claude-sonnet-4-6")),
+});
+```
+
+## Fine-grained configuration
+
+Assign a different model to each pipeline role:
+
+```typescript
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { extractFromPdf, type ModelConfig } from "@claritylabs-inc/cell";
+
+const anthropic = createAnthropic();
+const models: ModelConfig = {
+  classification: anthropic("claude-haiku-4-5-20251001"),
+  metadata: anthropic("claude-sonnet-4-6"),
+  sections: anthropic("claude-haiku-4-5-20251001"),
+  sectionsFallback: anthropic("claude-sonnet-4-6"),
+  enrichment: anthropic("claude-haiku-4-5-20251001"),
+};
+
+const { extracted } = await extractFromPdf(pdfBase64, { models });
+```
+
+## Non-Anthropic providers
+
+Cell works with any provider that implements the Vercel AI SDK `LanguageModel` interface:
+
+<Tabs items={["OpenAI", "Google"]}>
+  <Tab value="OpenAI">
+    ```typescript
+    import { createOpenAI } from "@ai-sdk/openai";
+    import { extractFromPdf, createUniformModelConfig } from "@claritylabs-inc/cell";
+
+    const openai = createOpenAI();
+    const { extracted } = await extractFromPdf(pdfBase64, {
+      models: createUniformModelConfig(openai("gpt-4o")),
+      metadataProviderOptions: {},  // disable Anthropic-specific thinking
+    });
+    ```
+  </Tab>
+  <Tab value="Google">
+    ```typescript
+    import { createGoogleGenerativeAI } from "@ai-sdk/google";
+    import { extractFromPdf, createUniformModelConfig } from "@claritylabs-inc/cell";
+
+    const google = createGoogleGenerativeAI();
+    const { extracted } = await extractFromPdf(pdfBase64, {
+      models: createUniformModelConfig(google("gemini-2.0-flash")),
+      metadataProviderOptions: {},
+    });
+    ```
+  </Tab>
+</Tabs>
+
+<Callout type="warn">
+  When using non-Anthropic providers, set `metadataProviderOptions: {}` and `fallbackProviderOptions: {}` to disable Anthropic-specific extended thinking, which is enabled by default.
+</Callout>
+
+## Token limits
+
+Cell sets per-role token limits based on the task, not the provider:
+
+| Role | Max Output Tokens |
+|------|------------------|
+| `classification` | 512 |
+| `metadata` | 4,096 |
+| `sections` | 8,192 |
+| `sectionsFallback` | 16,384 |
+| `enrichment` | 4,096 |
+
+These are exported as `MODEL_TOKEN_LIMITS` for reference but are managed internally by the pipeline.
+
+## Provider options
+
+The `metadataProviderOptions` and `fallbackProviderOptions` fields pass provider-specific configuration (like Anthropic extended thinking) through to the Vercel AI SDK:
+
+```typescript
+const { extracted } = await extractFromPdf(pdfBase64, {
+  metadataProviderOptions: {
+    anthropic: { thinking: { type: "enabled", budgetTokens: 8192 } },
+  },
+});
+```
+
+By default, Anthropic thinking is enabled with a 4,096 token budget for metadata and fallback calls.

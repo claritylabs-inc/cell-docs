@@ -1,0 +1,180 @@
+---
+title: Extraction API
+description: Complete reference for document extraction functions
+---
+
+## Pipeline functions
+
+### `classifyDocumentType(pdf, options?)`
+
+Classify a document as a policy or quote.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `pdf` | `string` | Base64-encoded PDF |
+| `options` | `ClassifyOptions` | Optional configuration |
+
+**Returns:** `Promise<{ documentType: "policy" | "quote"; confidence: number; signals: string[] }>`
+
+```typescript
+const { documentType, confidence, signals } = await classifyDocumentType(pdfBase64);
+```
+
+---
+
+### `extractFromPdf(pdf, options?)`
+
+Full policy extraction pipeline (passes 1-3).
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `pdf` | `string` | Base64-encoded PDF |
+| `options` | `ExtractOptions` | Optional configuration |
+
+**Returns:** `Promise<{ rawText: string; extracted: any }>`
+
+```typescript
+const { rawText, extracted } = await extractFromPdf(pdfBase64, {
+  log: async (msg) => console.log(msg),
+  onMetadata: async (raw) => await saveMetadata(raw),
+  models: customModels,
+});
+```
+
+---
+
+### `extractQuoteFromPdf(pdf, options?)`
+
+Full quote extraction pipeline (passes 1-2).
+
+**Parameters:** Same as `extractFromPdf`.
+
+**Returns:** `Promise<{ rawText: string; extracted: any }>`
+
+---
+
+### `extractSectionsOnly(pdf, metadataRaw, options?)`
+
+Retry section extraction using saved metadata from a prior pass 1.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `pdf` | `string` | Base64-encoded PDF |
+| `metadataRaw` | `string` | JSON string from a previous pass 1 |
+| `options` | `ExtractSectionsOptions` | Optional configuration |
+
+**Returns:** `Promise<{ rawText: string; extracted: any }>`
+
+---
+
+### `enrichSupplementaryFields(document, models?, log?)`
+
+Pass 3 enrichment. Parses raw text into structured supplementary fields. Non-fatal — returns the document unchanged on failure.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `document` | `any` | Document object with raw supplementary fields |
+| `models` | `ModelConfig` | Optional model config |
+| `log` | `LogFn` | Optional logger |
+
+**Returns:** `Promise<any>`
+
+## Mapping functions
+
+### `applyExtracted(extracted)`
+
+Map raw policy extraction JSON to persistence-ready fields.
+
+**Returns:** Object with `carrier`, `policyNumber`, `coverages`, `effectiveDate`, `expirationDate`, etc.
+
+---
+
+### `applyExtractedQuote(extracted)`
+
+Map raw quote extraction JSON to persistence-ready fields.
+
+**Returns:** Object with `quoteNumber`, `premiumBreakdown`, `subjectivities`, `proposedEffectiveDate`, etc.
+
+## Merge functions
+
+### `mergeChunkedSections(metadataResult, sectionChunks)`
+
+Merge section chunks from policy extraction. Combines sections and takes the last non-null supplementary field.
+
+---
+
+### `mergeChunkedQuoteSections(metadataResult, sectionChunks)`
+
+Merge section chunks from quote extraction. Also accumulates subjectivities and underwriting conditions.
+
+## Utility functions
+
+### `getPageChunks(totalPages, chunkSize?)`
+
+Calculate page ranges for chunked extraction.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `totalPages` | `number` | — | Total page count |
+| `chunkSize` | `number` | `30` | Pages per chunk |
+
+**Returns:** `Array<[number, number]>`
+
+---
+
+### `stripFences(text)`
+
+Remove markdown code fences from AI response text.
+
+---
+
+### `sanitizeNulls<T>(obj)`
+
+Recursively convert `null` values to `undefined`.
+
+## Options types
+
+### `ExtractOptions`
+
+```typescript
+interface ExtractOptions {
+  log?: LogFn;
+  onMetadata?: (raw: string) => Promise<void>;
+  models?: ModelConfig;
+  metadataProviderOptions?: ProviderOptions;
+  fallbackProviderOptions?: ProviderOptions;
+}
+```
+
+### `ClassifyOptions`
+
+```typescript
+interface ClassifyOptions {
+  log?: LogFn;
+  models?: ModelConfig;
+}
+```
+
+### `ExtractSectionsOptions`
+
+```typescript
+interface ExtractSectionsOptions {
+  log?: LogFn;
+  promptBuilder?: PromptBuilder;
+  models?: ModelConfig;
+  fallbackProviderOptions?: ProviderOptions;
+}
+```
+
+### `LogFn`
+
+```typescript
+type LogFn = (message: string) => Promise<void>;
+```
+
+## Constants
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `SONNET_MODEL` | `"claude-sonnet-4-6"` | Default Sonnet model ID |
+| `HAIKU_MODEL` | `"claude-haiku-4-5-20251001"` | Default Haiku model ID |

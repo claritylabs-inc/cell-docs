@@ -1,34 +1,50 @@
-> **Customize this file**: Tailor this template to your project by noting specific contribution types you're looking for, adding a Code of Conduct, or adjusting the writing guidelines to match your style.
+# Contributing
 
-# Contribute to the documentation
+## Local setup
 
-Thank you for your interest in contributing to our documentation! This guide will help you get started.
+```bash
+git clone https://github.com/clarity-labs/cell-docs.git
+cd cell-docs
+npm install
+npm run dev
+```
 
-## How to contribute
+## Making changes
 
-### Option 1: Edit directly on GitHub
+1. Create a branch from `main`
+2. Edit MDX files in `content/docs/`
+3. Preview locally with `npm run dev`
+4. Run `npm run build` to verify the build passes
+5. Submit a pull request
 
-1. Navigate to the page you want to edit
-2. Click the "Edit this file" button (the pencil icon)
-3. Make your changes and submit a pull request
+## Adding pages
 
-### Option 2: Local development
+1. Create an MDX file in the appropriate `content/docs/` subdirectory
+2. Add frontmatter with `title` and `description`
+3. Add the filename (without `.mdx`) to that directory's `meta.json` `pages` array
 
-1. Fork and clone this repository
-2. Install the Mintlify CLI: `npm i -g mint`
-3. Create a branch for your changes
-4. Make changes
-5. Navigate to the docs directory and run `mint dev`
-6. Preview your changes at `http://localhost:3000`
-7. Commit your changes and submit a pull request
+Example frontmatter:
 
-For more details on local development, see our [development guide](development.mdx).
+```yaml
+---
+title: Page Title
+description: Brief description of the page content
+---
+```
 
 ## Writing guidelines
 
-- **Use active voice**: "Run the command" not "The command should be run"
-- **Address the reader directly**: Use "you" instead of "the user"
-- **Keep sentences concise**: Aim for one idea per sentence
-- **Lead with the goal**: Start instructions with what the user wants to accomplish
-- **Use consistent terminology**: Don't alternate between synonyms for the same concept
-- **Include examples**: Show, don't just tell
+- Use active voice and address the reader as "you"
+- Keep sentences concise — one idea per sentence
+- Use sentence case for headings
+- Include code examples wherever possible
+- Use `<Callout type="info">` for important notes and `<Callout type="warn">` for warnings
+
+## Available components
+
+Import from `fumadocs-ui/components/*`:
+
+- `<Callout type="info|warn|error">` — Highlighted notes
+- `<Cards>` + `<Card>` — Link cards for navigation
+- `<Tabs items={[]}>` + `<Tab value="">` — Tabbed content
+- `<Steps>` + `<Step>` — Numbered steps

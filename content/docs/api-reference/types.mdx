@@ -1,0 +1,313 @@
+---
+title: Type Reference
+description: Complete reference for all exported TypeScript types
+---
+
+## Document types
+
+### `InsuranceDocument`
+
+Discriminated union of `PolicyDocument | QuoteDocument`.
+
+```typescript
+type InsuranceDocument = PolicyDocument | QuoteDocument;
+```
+
+### `BaseDocument`
+
+Shared fields for all insurance documents.
+
+```typescript
+interface BaseDocument {
+  id: string;
+  type: "policy" | "quote";
+  carrier: string;
+  security?: string;
+  insuredName: string;
+  premium?: string;
+  summary?: string;
+  policyTypes?: string[];
+  coverages: Coverage[];
+  sections?: Section[];
+}
+```
+
+### `PolicyDocument`
+
+```typescript
+interface PolicyDocument extends BaseDocument {
+  type: "policy";
+  policyNumber: string;
+  effectiveDate: string;
+  expirationDate: string;
+}
+```
+
+### `QuoteDocument`
+
+```typescript
+interface QuoteDocument extends BaseDocument {
+  type: "quote";
+  quoteNumber: string;
+  proposedEffectiveDate?: string;
+  proposedExpirationDate?: string;
+  quoteExpirationDate?: string;
+  subjectivities?: Subjectivity[];
+  underwritingConditions?: UnderwritingCondition[];
+  premiumBreakdown?: PremiumLine[];
+}
+```
+
+### `Coverage`
+
+```typescript
+interface Coverage {
+  name: string;
+  limit: string;
+  deductible?: string;
+  pageNumber?: number;
+  sectionRef?: string;
+}
+```
+
+### `Section`
+
+```typescript
+interface Section {
+  title: string;
+  sectionNumber?: string;
+  pageStart: number;
+  pageEnd?: number;
+  type: string;
+  coverageType?: string;
+  content: string;
+  subsections?: Subsection[];
+}
+```
+
+### `Subsection`
+
+```typescript
+interface Subsection {
+  title: string;
+  sectionNumber?: string;
+  pageNumber?: number;
+  content: string;
+}
+```
+
+### `Subjectivity`
+
+```typescript
+interface Subjectivity {
+  description: string;
+  category?: string;
+}
+```
+
+### `UnderwritingCondition`
+
+```typescript
+interface UnderwritingCondition {
+  description: string;
+}
+```
+
+### `PremiumLine`
+
+```typescript
+interface PremiumLine {
+  line: string;
+  amount: string;
+}
+```
+
+## Platform types
+
+### `Platform`
+
+```typescript
+type Platform = "email" | "chat" | "sms" | "slack" | "discord";
+```
+
+### `CommunicationIntent`
+
+```typescript
+type CommunicationIntent = "direct" | "mediated" | "observed";
+```
+
+### `PlatformConfig`
+
+```typescript
+interface PlatformConfig {
+  supportsMarkdown: boolean;
+  supportsLinks: boolean;
+  supportsRichFormatting: boolean;
+  maxResponseLength?: number;
+  signOff?: boolean;
+}
+```
+
+### `AgentContext`
+
+```typescript
+interface AgentContext {
+  platform: Platform;
+  intent: CommunicationIntent;
+  platformConfig?: PlatformConfig;
+  companyName?: string;
+  companyContext?: string;
+  siteUrl: string;
+  userName?: string;
+  coiHandling?: "broker" | "user" | "member" | "ignore";
+  brokerName?: string;
+  brokerContactName?: string;
+  brokerContactEmail?: string;
+}
+```
+
+### `PLATFORM_CONFIGS`
+
+```typescript
+const PLATFORM_CONFIGS: Record<Platform, PlatformConfig>;
+```
+
+Pre-configured platform settings. See [Platforms & Intents](/docs/agent/platforms).
+
+## Model types
+
+### `ModelConfig`
+
+```typescript
+interface ModelConfig {
+  classification: LanguageModel;   // Pass 0: document type classification
+  metadata: LanguageModel;         // Pass 1: metadata extraction
+  sections: LanguageModel;         // Pass 2: chunked section extraction
+  sectionsFallback: LanguageModel; // Pass 2 fallback when sections truncate
+  enrichment: LanguageModel;       // Pass 3: supplementary field enrichment
+}
+```
+
+### `createUniformModelConfig(model)`
+
+Create a `ModelConfig` where every role uses the same model.
+
+```typescript
+function createUniformModelConfig(model: LanguageModel): ModelConfig;
+```
+
+### `createDefaultModelConfig()`
+
+Create a `ModelConfig` using Anthropic defaults. Requires `@ai-sdk/anthropic` (lazy-imported).
+
+```typescript
+function createDefaultModelConfig(): ModelConfig;
+```
+
+### `MODEL_TOKEN_LIMITS`
+
+```typescript
+const MODEL_TOKEN_LIMITS: {
+  classification: 512;
+  metadata: 4096;
+  sections: 8192;
+  sectionsFallback: 16384;
+  enrichment: 4096;
+};
+```
+
+## Tool types
+
+### `ToolDefinition`
+
+```typescript
+interface ToolDefinition {
+  name: string;
+  description: string;
+  input_schema: {
+    type: "object";
+    properties: Record<string, unknown>;
+    required?: string[];
+  };
+}
+```
+
+## Extraction types
+
+### `LogFn`
+
+```typescript
+type LogFn = (message: string) => Promise<void>;
+```
+
+### `PromptBuilder`
+
+```typescript
+type PromptBuilder = (pageStart: number, pageEnd: number) => string;
+```
+
+### `ExtractOptions`
+
+```typescript
+interface ExtractOptions {
+  log?: LogFn;
+  onMetadata?: (raw: string) => Promise<void>;
+  models?: ModelConfig;
+  metadataProviderOptions?: ProviderOptions;
+  fallbackProviderOptions?: ProviderOptions;
+}
+```
+
+### `ClassifyOptions`
+
+```typescript
+interface ClassifyOptions {
+  log?: LogFn;
+  models?: ModelConfig;
+}
+```
+
+### `ExtractSectionsOptions`
+
+```typescript
+interface ExtractSectionsOptions {
+  log?: LogFn;
+  promptBuilder?: PromptBuilder;
+  models?: ModelConfig;
+  fallbackProviderOptions?: ProviderOptions;
+}
+```
+
+## PDF types
+
+### `AcroFormFieldInfo`
+
+```typescript
+interface AcroFormFieldInfo {
+  name: string;
+  type: "text" | "checkbox" | "dropdown" | "radio";
+  options?: string[];
+}
+```
+
+### `FieldMapping`
+
+```typescript
+interface FieldMapping {
+  acroFormName: string;
+  value: string;
+}
+```
+
+### `TextOverlay`
+
+```typescript
+interface TextOverlay {
+  page: number;
+  x: number;
+  y: number;
+  text: string;
+  fontSize?: number;
+  isCheckmark?: boolean;
+}
+```

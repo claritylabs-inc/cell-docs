@@ -1,0 +1,115 @@
+---
+title: Quickstart
+description: Install Cell and run your first insurance document extraction
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Cards, Card } from "fumadocs-ui/components/card";
+
+## Installation
+
+Install Cell and its peer dependencies:
+
+```bash
+npm install @claritylabs-inc/cell ai pdf-lib
+```
+
+Then install a model provider:
+
+```bash
+# Anthropic (default)
+npm install @ai-sdk/anthropic
+
+# OpenAI
+npm install @ai-sdk/openai
+
+# Google
+npm install @ai-sdk/google
+```
+
+<Callout type="info">
+  Cell is published to GitHub Packages. You'll need a `.npmrc` that points `@claritylabs-inc` to `https://npm.pkg.github.com`.
+</Callout>
+
+## Extract a policy
+
+The simplest path — default Anthropic models, no configuration:
+
+```typescript
+import { classifyDocumentType, extractFromPdf, applyExtracted } from "@claritylabs-inc/cell";
+import { readFileSync } from "fs";
+
+// Load a PDF as base64
+const pdfBase64 = readFileSync("./policy.pdf").toString("base64");
+
+// Step 1: Classify — is this a policy or a quote?
+const { documentType, confidence } = await classifyDocumentType(pdfBase64);
+console.log(`Classified as ${documentType} (confidence: ${confidence})`);
+
+// Step 2: Extract — run the full multi-pass pipeline
+const { extracted } = await extractFromPdf(pdfBase64);
+
+// Step 3: Apply — map raw extraction to structured fields
+const fields = applyExtracted(extracted);
+console.log(fields.carrier);        // "Hartford"
+console.log(fields.policyNumber);   // "GL-2024-001234"
+console.log(fields.coverages);      // [{ name: "General Liability", limit: "$1,000,000", ... }]
+```
+
+## Extract a quote
+
+Quotes have a separate pipeline that captures quote-specific fields like subjectivities and premium breakdowns:
+
+```typescript
+import { extractQuoteFromPdf, applyExtractedQuote } from "@claritylabs-inc/cell";
+
+const { extracted } = await extractQuoteFromPdf(pdfBase64);
+const fields = applyExtractedQuote(extracted);
+
+console.log(fields.quoteNumber);          // "Q-2024-5678"
+console.log(fields.premiumBreakdown);     // [{ line: "GL", amount: "$5,200" }, ...]
+console.log(fields.subjectivities);       // [{ description: "Loss runs required", ... }]
+```
+
+## Use a custom model
+
+Bring any model from any provider:
+
+```typescript
+import { createOpenAI } from "@ai-sdk/openai";
+import { extractFromPdf, createUniformModelConfig } from "@claritylabs-inc/cell";
+
+const openai = createOpenAI();
+const { extracted } = await extractFromPdf(pdfBase64, {
+  models: createUniformModelConfig(openai("gpt-4o")),
+  metadataProviderOptions: {},  // disable Anthropic-specific thinking
+});
+```
+
+## Add logging
+
+Every pipeline function accepts a `log` callback:
+
+```typescript
+const { extracted } = await extractFromPdf(pdfBase64, {
+  log: async (msg) => console.log(`[cell] ${msg}`),
+});
+```
+
+Output:
+
+```
+[cell] Pass 1: Extracting metadata...
+[cell] Calling model (max 4096 tokens)...
+[cell] 12450 in / 2300 out tokens (3.2s)
+[cell] Document: 45 page(s)
+[cell] Pass 2: Extracting sections pages 1–15...
+...
+```
+
+## Next steps
+
+<Cards>
+  <Card title="Architecture" description="Learn how the multi-pass pipeline works." href="/docs/getting-started/architecture" />
+  <Card title="Model configuration" description="Fine-tune which model runs each pass." href="/docs/getting-started/models" />
+</Cards>

@@ -1,0 +1,12 @@
+{
+  "root": true,
+  "pages": [
+    "index",
+    "getting-started",
+    "extraction",
+    "agent",
+    "application",
+    "api-reference",
+    "changelog"
+  ]
+}

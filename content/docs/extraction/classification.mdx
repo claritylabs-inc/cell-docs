@@ -1,0 +1,64 @@
+---
+title: Document Classification
+description: Classify insurance documents as policies or quotes
+---
+
+Before running the full extraction pipeline, Cell can classify a document to determine whether it's a policy or a quote. This drives which extraction flow to use.
+
+## Basic usage
+
+```typescript
+import { classifyDocumentType } from "@claritylabs-inc/cell";
+
+const { documentType, confidence, signals } = await classifyDocumentType(pdfBase64);
+
+console.log(documentType);  // "policy" | "quote"
+console.log(confidence);    // 0.95
+console.log(signals);       // ["declarations_page", "policy_number_present", ...]
+```
+
+## Options
+
+```typescript
+const result = await classifyDocumentType(pdfBase64, {
+  log: async (msg) => console.log(msg),
+  models: customModelConfig,
+});
+```
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `log` | `LogFn` | Callback for progress logging |
+| `models` | `ModelConfig` | Custom model configuration. Uses `classification` role. |
+
+## How it works
+
+Classification is **Pass 0** in the pipeline. It uses the `classification` model (Claude Haiku by default) to analyze the PDF and return:
+
+- **`documentType`** — `"policy"` or `"quote"`. Defaults to `"policy"` on parse failure.
+- **`confidence`** — numeric confidence score (0-1). Defaults to 0.5 on parse failure.
+- **`signals`** — array of strings describing what signals the model detected.
+
+## Routing extraction
+
+A typical flow uses classification to choose the right extraction function:
+
+```typescript
+import {
+  classifyDocumentType,
+  extractFromPdf,
+  extractQuoteFromPdf,
+  applyExtracted,
+  applyExtractedQuote,
+} from "@claritylabs-inc/cell";
+
+const { documentType } = await classifyDocumentType(pdfBase64);
+
+if (documentType === "quote") {
+  const { extracted } = await extractQuoteFromPdf(pdfBase64);
+  return applyExtractedQuote(extracted);
+} else {
+  const { extracted } = await extractFromPdf(pdfBase64);
+  return applyExtracted(extracted);
+}
+```

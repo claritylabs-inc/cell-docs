@@ -1,0 +1,92 @@
+---
+title: Architecture
+description: How Cell's multi-pass extraction pipeline and composable systems work
+---
+
+Cell is organized into four systems: **document extraction**, **application processing**, **agent prompts**, and **PDF operations**. Each is independent — import only what you need.
+
+## Document extraction pipeline
+
+The core of Cell is a multi-pass pipeline that turns insurance PDFs into structured, queryable data.
+
+```mermaid
+flowchart LR
+  PDF[PDF Document] --> P0[Pass 0: Classification]
+  P0 --> P1[Pass 1: Metadata]
+  P1 --> P2[Pass 2: Sections]
+  P2 --> P3[Pass 3: Enrichment]
+  P3 --> OUT[Structured Data]
+```
+
+### Pass 0 — Classification
+
+Determines whether a document is a **policy** or a **quote**. Returns document type, confidence score, and supporting signals. Uses the `classification` model (fast/cheap).
+
+### Pass 1 — Metadata
+
+Extracts high-level metadata: carrier, policy/quote number, dates, premium, insured name, and a coverage table with limits and deductibles. Uses the `metadata` model (capable).
+
+Supports an `onMetadata` callback for early persistence — metadata is saved immediately so it survives downstream failures.
+
+### Pass 2 — Sections
+
+Splits the document into page chunks (starting at 15 pages) and extracts structured sections with page-level provenance. Uses the `sections` model.
+
+**Adaptive fallback**: if a chunk's output is truncated (JSON parse failure), Cell re-splits into smaller chunks (10 pages, then 5), and escalates to the `sectionsFallback` model with higher token limits. Results are merged across all chunks.
+
+### Pass 3 — Enrichment
+
+A non-fatal pass that parses raw text into structured supplementary fields: regulatory context, complaint contacts, costs and fees, claims contacts. Uses the `enrichment` model. Failures here don't fail the pipeline.
+
+## Quote-specific extraction
+
+Quotes run a variant pipeline (passes 1-2) that also extracts:
+
+- **Premium breakdowns** — line-by-line premium details
+- **Subjectivities** — conditions that must be met before binding
+- **Underwriting conditions** — carrier requirements
+
+## Application processing
+
+Cell provides prompt builders for the full application lifecycle:
+
+```mermaid
+flowchart LR
+  D[Detection] --> F[Field Extraction]
+  F --> A[Auto-Fill]
+  A --> Q[Question Batching]
+  Q --> P[Answer Parsing]
+  P --> PDF[PDF Filling]
+```
+
+1. **Detection** — classify whether a PDF is an insurance application form
+2. **Field extraction** — read every field as structured data (text, numeric, currency, date, yes/no, table, declaration)
+3. **Auto-fill** — match fields against known business context
+4. **Question batching** — organize unfilled fields into topic-based batches
+5. **Answer parsing** — parse free-text replies into structured field values
+6. **PDF filling** — write answers back onto the PDF (AcroForm or text overlay)
+
+## Agent prompt system
+
+A composable system for building insurance-aware conversational agents:
+
+```
+buildAgentSystemPrompt(ctx)
+  ├── Identity          — agent name, company context
+  ├── Intent            — direct / mediated / observed behavior
+  ├── Formatting        — platform-specific output rules
+  ├── Safety            — scope guardrails, anti-hallucination
+  ├── Coverage gaps     — gap detection guidance
+  ├── COI routing       — certificate of insurance handling
+  ├── Quotes/policies   — document type differentiation
+  └── Memory            — cross-conversation continuity
+```
+
+Each module is independently importable for custom composition. The system supports five platforms (email, chat, SMS, Slack, Discord) and three communication intents (direct, mediated, observed).
+
+## Design principles
+
+- **Provider-agnostic** — accepts any `LanguageModel` from the Vercel AI SDK. Default Anthropic models are lazy-loaded and optional.
+- **Pure TypeScript** — no framework dependencies. Works in Node.js, Deno, edge runtimes.
+- **Fail gracefully** — early persistence callbacks, non-fatal enrichment, adaptive chunk retry.
+- **Schema-only tools** — tool definitions provide schemas without implementations, so consumers control execution.

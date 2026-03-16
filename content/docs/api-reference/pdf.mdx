@@ -1,0 +1,74 @@
+---
+title: PDF Operations API
+description: Complete reference for PDF form filling and text overlay functions
+---
+
+## AcroForm
+
+### `getAcroFormFields(pdfDoc)`
+
+Enumerate all AcroForm fields from a PDF document.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `pdfDoc` | `PDFDocument` | A pdf-lib `PDFDocument` instance |
+
+**Returns:** `AcroFormFieldInfo[]` — empty array if no form fields exist.
+
+```typescript
+interface AcroFormFieldInfo {
+  name: string;
+  type: "text" | "checkbox" | "dropdown" | "radio";
+  options?: string[];  // For dropdown and radio fields
+}
+```
+
+---
+
+### `fillAcroForm(pdfBytes, mappings)`
+
+Fill AcroForm fields by name and flatten the form.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `pdfBytes` | `Uint8Array` | Raw PDF bytes |
+| `mappings` | `FieldMapping[]` | Field name to value mappings |
+
+**Returns:** `Promise<Uint8Array>` — the filled and flattened PDF bytes.
+
+```typescript
+interface FieldMapping {
+  acroFormName: string;
+  value: string;
+}
+```
+
+**Checkbox values:** `"yes"`, `"true"`, `"x"`, `"checked"`, `"on"` → checked. Anything else → unchecked.
+
+Missing fields and invalid dropdown/radio values are silently skipped.
+
+## Text overlay
+
+### `overlayTextOnPdf(pdfBytes, overlays)`
+
+Overlay text at specified coordinates on a flat PDF.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `pdfBytes` | `Uint8Array` | Raw PDF bytes |
+| `overlays` | `TextOverlay[]` | Text overlays to apply |
+
+**Returns:** `Promise<Uint8Array>` — the modified PDF bytes.
+
+```typescript
+interface TextOverlay {
+  page: number;         // 0-indexed page number
+  x: number;            // percentage from left edge (0-100)
+  y: number;            // percentage from top edge (0-100)
+  text: string;
+  fontSize?: number;    // default: 10
+  isCheckmark?: boolean; // draws "X" instead of text
+}
+```
+
+Uses Helvetica font. Overlays targeting non-existent pages are skipped.
