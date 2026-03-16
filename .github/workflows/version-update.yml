@@ -43,9 +43,8 @@ jobs:
           echo "patch=$PATCH" >> $GITHUB_OUTPUT
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
 
-          # Determine if this is a major bump by checking if previous major.minor branch exists
-          git ls-remote --heads origin | grep -q "refs/heads/v$((MAJOR-1))." && IS_MAJOR=true || IS_MAJOR=false
-          # More accurate: check if minor is 0 and patch is 0 and major > 0
+          # Major bump = minor is 0, patch is 0, major > 0
+          IS_MAJOR=false
           if [ "$MINOR" = "0" ] && [ "$PATCH" = "0" ] && [ "$MAJOR" != "0" ]; then
             IS_MAJOR=true
           fi
@@ -64,29 +63,28 @@ jobs:
           node-version: "22"
           registry-url: "https://npm.pkg.github.com"
 
+      - name: Install dependencies
+        run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
       - name: Save old type definitions
         run: |
-          OLD_TYPES="/tmp/old-types.d.ts"
-          if [ -f "node_modules/@claritylabs-inc/cell/dist/index.d.ts" ]; then
-            cp node_modules/@claritylabs-inc/cell/dist/index.d.ts "$OLD_TYPES"
-          else
-            npm ci
-            cp node_modules/@claritylabs-inc/cell/dist/index.d.ts "$OLD_TYPES"
-          fi
-          echo "old_types=$OLD_TYPES" >> $GITHUB_ENV
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          cp node_modules/@claritylabs-inc/cell/dist/index.d.ts /tmp/old-types.d.ts
+          echo "OLD_TYPES=/tmp/old-types.d.ts" >> $GITHUB_ENV
 
       - name: Install new cell version
-        run: |
-          npm install @claritylabs-inc/cell@${{ steps.semver.outputs.version }}
+        run: npm install @claritylabs-inc/cell@${{ steps.semver.outputs.version }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
-      - name: Commit dependency update on main
+      - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit dependency update on main
+        run: |
           git add package.json package-lock.json
           git commit -m "chore: update @claritylabs-inc/cell to v${{ steps.semver.outputs.version }}" || echo "No changes to commit"
 
@@ -108,10 +106,11 @@ jobs:
           fi
           npx tsx scripts/generate-docs.ts \
             --version ${{ steps.semver.outputs.version }} \
-            --old-types "$old_types" \
+            --old-types "$OLD_TYPES" \
             $MAJOR_FLAG
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Commit generated docs
         run: |
@@ -120,12 +119,8 @@ jobs:
 
       - name: Update versions config
         run: |
-          # Collect all version branches
-          BRANCHES=$(git branch -r --list 'origin/v*' | sed 's|origin/||' | sort -V)
-          CURRENT="${{ steps.semver.outputs.version }}"
-          BASE_URL="\${process.env.NEXT_PUBLIC_DOCS_BASE_URL ?? \"https://cell.claritylabs.inc/docs\"}"
+          BRANCHES=$(git branch -r --list 'origin/v*' | sed 's|origin/||' | sed 's/ //g' | sort -V)
 
-          # Generate lib/versions.ts
           cat > lib/versions.ts << 'TSEOF'
           export const CURRENT_VERSION = process.env.CELL_VERSION ?? "0.0.0";
 
@@ -158,7 +153,7 @@ jobs:
 
       - name: Generate vercel.json rewrites
         run: |
-          BRANCHES=$(git branch -r --list 'origin/v*' | sed 's|origin/||' | sort -V)
+          BRANCHES=$(git branch -r --list 'origin/v*' | sed 's|origin/||' | sed 's/ //g' | sort -V)
 
           echo '{' > vercel.json
           echo '  "rewrites": [' >> vercel.json

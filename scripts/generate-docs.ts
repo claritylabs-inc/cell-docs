@@ -31,7 +31,7 @@ if (!version || !oldTypesPath) {
 // Paths
 // ---------------------------------------------------------------------------
 
-const ROOT = resolve(import.meta.dirname, "..");
+const ROOT = process.cwd();
 const CONTENT = join(ROOT, "content", "docs");
 const NEW_TYPES_PATH = resolve(
   ROOT,
