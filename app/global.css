@@ -633,9 +633,9 @@ div[data-search] {
 [data-toc] a {
   font-size: 0.8125rem;
   transition: color 150ms ease;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
   display: block;
   max-width: 100%;
 }
@@ -645,12 +645,14 @@ div[data-search] {
   font-weight: 500;
 }
 
-/* TOC inline code — compact sizing */
+/* TOC inline code — compact sizing, no wrap */
 [data-toc] code {
-  font-size: 0.6875rem;
-  padding: 0.5px 0.3em;
+  font-size: 0.625rem !important;
+  padding: 1px 0.25em !important;
   border-radius: 0.2rem;
   background: rgba(17, 24, 39, 0.04);
+  white-space: nowrap !important;
+  line-height: 1.4;
 }
 
 .dark [data-toc] code {
