@@ -80,20 +80,25 @@ Rules:
 - Preserve all existing content that is not affected by the changes`;
 
 // ---------------------------------------------------------------------------
-// 1. Diff analysis
+// Main
 // ---------------------------------------------------------------------------
 
-console.log(`Generating docs for v${version} (major: ${isMajor})`);
+async function main() {
+  // -------------------------------------------------------------------------
+  // 1. Diff analysis
+  // -------------------------------------------------------------------------
 
-const oldTypes = readFile(oldTypesPath);
-const newTypes = existsSync(NEW_TYPES_PATH) ? readFile(NEW_TYPES_PATH) : "";
+  console.log(`Generating docs for v${version} (major: ${isMajor})`);
 
-if (!newTypes) {
-  console.error(`Could not read new types at ${NEW_TYPES_PATH}`);
-  process.exit(1);
-}
+  const oldTypes = readFile(oldTypesPath!);
+  const newTypes = existsSync(NEW_TYPES_PATH) ? readFile(NEW_TYPES_PATH) : "";
 
-const diffPrompt = `Compare these two TypeScript declaration files and list the changes:
+  if (!newTypes) {
+    console.error(`Could not read new types at ${NEW_TYPES_PATH}`);
+    process.exit(1);
+  }
+
+  const diffPrompt = `Compare these two TypeScript declaration files and list the changes:
 
 OLD (previous version):
 \`\`\`typescript
@@ -112,23 +117,23 @@ List each change as:
 
 If there are no changes, say "No changes detected."`;
 
-console.log("Analyzing type diffs...");
-const diffAnalysis = await callHaiku(
-  "You analyze TypeScript declaration file diffs. Be precise and thorough.",
-  diffPrompt
-);
-console.log("Diff analysis:\n", diffAnalysis);
+  console.log("Analyzing type diffs...");
+  const diffAnalysis = await callHaiku(
+    "You analyze TypeScript declaration file diffs. Be precise and thorough.",
+    diffPrompt
+  );
+  console.log("Diff analysis:\n", diffAnalysis);
 
-// ---------------------------------------------------------------------------
-// 2. Changelog generation (all releases)
-// ---------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // 2. Changelog generation (all releases)
+  // -------------------------------------------------------------------------
 
-console.log("Generating changelog entry...");
+  console.log("Generating changelog entry...");
 
-const changelogPath = "changelog.mdx";
-const existingChangelog = existsSync(join(CONTENT, changelogPath))
-  ? readContentFile(changelogPath)
-  : `---
+  const changelogPath = "changelog.mdx";
+  const existingChangelog = existsSync(join(CONTENT, changelogPath))
+    ? readContentFile(changelogPath)
+    : `---
 title: Changelog
 description: Release history for @claritylabs-inc/cell
 ---
@@ -136,8 +141,8 @@ description: Release history for @claritylabs-inc/cell
 All notable changes to \`@claritylabs-inc/cell\` will be documented here. This page is automatically updated when new versions are published.
 `;
 
-const today = new Date().toISOString().split("T")[0];
-const changelogPrompt = `Generate a changelog entry for v${version} (released ${today}).
+  const today = new Date().toISOString().split("T")[0];
+  const changelogPrompt = `Generate a changelog entry for v${version} (released ${today}).
 
 Changes detected:
 ${diffAnalysis}
@@ -159,51 +164,50 @@ The entry should follow this format:
 Only include sections (Added/Changed/Removed) that have entries.
 Do NOT include the frontmatter or any top-level "# Changelog" heading — just the version entry starting with ##.`;
 
-const changelogEntry = await callHaiku(SYSTEM_PROMPT, changelogPrompt);
+  const changelogEntry = await callHaiku(SYSTEM_PROMPT, changelogPrompt);
 
-// Append changelog entry after the intro paragraph (after the first blank line following frontmatter content)
-const frontmatterEnd = existingChangelog.indexOf("---", 3) + 3;
-const bodyContent = existingChangelog.slice(frontmatterEnd);
-// Find the end of the intro paragraph (first double newline in body)
-const introEnd = bodyContent.indexOf("\n\n");
-const insertPoint =
-  introEnd !== -1
-    ? frontmatterEnd + introEnd + 2
-    : existingChangelog.length;
-const updatedChangelog =
-  existingChangelog.slice(0, insertPoint) +
-  "\n" +
-  changelogEntry.trim() +
-  "\n" +
-  existingChangelog.slice(insertPoint);
+  // Append changelog entry after the intro paragraph
+  const frontmatterEnd = existingChangelog.indexOf("---", 3) + 3;
+  const bodyContent = existingChangelog.slice(frontmatterEnd);
+  const introEnd = bodyContent.indexOf("\n\n");
+  const insertPoint =
+    introEnd !== -1
+      ? frontmatterEnd + introEnd + 2
+      : existingChangelog.length;
+  const updatedChangelog =
+    existingChangelog.slice(0, insertPoint) +
+    "\n" +
+    changelogEntry.trim() +
+    "\n" +
+    existingChangelog.slice(insertPoint);
 
-writeContentFile(changelogPath, updatedChangelog);
-console.log("Changelog updated.");
+  writeContentFile(changelogPath, updatedChangelog);
+  console.log("Changelog updated.");
 
-// ---------------------------------------------------------------------------
-// 3. API reference regeneration (major only)
-// ---------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // 3. API reference regeneration (major only)
+  // -------------------------------------------------------------------------
 
-if (isMajor) {
-  const apiRefPages = [
-    "api-reference/extraction.mdx",
-    "api-reference/agent.mdx",
-    "api-reference/application.mdx",
-    "api-reference/pdf.mdx",
-    "api-reference/types.mdx",
-  ];
+  if (isMajor) {
+    const apiRefPages = [
+      "api-reference/extraction.mdx",
+      "api-reference/agent.mdx",
+      "api-reference/application.mdx",
+      "api-reference/pdf.mdx",
+      "api-reference/types.mdx",
+    ];
 
-  for (const page of apiRefPages) {
-    const fullPath = join(CONTENT, page);
-    if (!existsSync(fullPath)) {
-      console.log(`Skipping ${page} (not found)`);
-      continue;
-    }
+    for (const page of apiRefPages) {
+      const fullPath = join(CONTENT, page);
+      if (!existsSync(fullPath)) {
+        console.log(`Skipping ${page} (not found)`);
+        continue;
+      }
 
-    console.log(`Updating API reference: ${page}...`);
-    const currentMdx = readContentFile(page);
+      console.log(`Updating API reference: ${page}...`);
+      const currentMdx = readContentFile(page);
 
-    const apiPrompt = `Update this API reference page to reflect the new type definitions for v${version}.
+      const apiPrompt = `Update this API reference page to reflect the new type definitions for v${version}.
 
 Current MDX page:
 \`\`\`mdx
@@ -226,40 +230,40 @@ Rules:
 - Keep all existing prose that is still accurate
 - Output the COMPLETE updated MDX file (including frontmatter)`;
 
-    const updatedPage = await callHaiku(SYSTEM_PROMPT, apiPrompt);
-    writeContentFile(page, updatedPage);
-    console.log(`Updated: ${page}`);
-  }
-
-  // ---------------------------------------------------------------------------
-  // 4. Guide updates (major only)
-  // ---------------------------------------------------------------------------
-
-  const guidePages = [
-    "getting-started/quickstart.mdx",
-    "getting-started/architecture.mdx",
-    "getting-started/models.mdx",
-    "extraction/pipeline.mdx",
-    "extraction/classification.mdx",
-    "extraction/applying-results.mdx",
-    "agent/system-prompt.mdx",
-    "agent/platforms.mdx",
-    "agent/tools.mdx",
-    "application/overview.mdx",
-    "application/pdf-operations.mdx",
-  ];
-
-  for (const page of guidePages) {
-    const fullPath = join(CONTENT, page);
-    if (!existsSync(fullPath)) {
-      console.log(`Skipping guide ${page} (not found)`);
-      continue;
+      const updatedPage = await callHaiku(SYSTEM_PROMPT, apiPrompt);
+      writeContentFile(page, updatedPage);
+      console.log(`Updated: ${page}`);
     }
 
-    console.log(`Updating guide: ${page}...`);
-    const currentMdx = readContentFile(page);
+    // -----------------------------------------------------------------------
+    // 4. Guide updates (major only)
+    // -----------------------------------------------------------------------
 
-    const guidePrompt = `Update this guide page to reflect API changes in v${version}.
+    const guidePages = [
+      "getting-started/quickstart.mdx",
+      "getting-started/architecture.mdx",
+      "getting-started/models.mdx",
+      "extraction/pipeline.mdx",
+      "extraction/classification.mdx",
+      "extraction/applying-results.mdx",
+      "agent/system-prompt.mdx",
+      "agent/platforms.mdx",
+      "agent/tools.mdx",
+      "application/overview.mdx",
+      "application/pdf-operations.mdx",
+    ];
+
+    for (const page of guidePages) {
+      const fullPath = join(CONTENT, page);
+      if (!existsSync(fullPath)) {
+        console.log(`Skipping guide ${page} (not found)`);
+        continue;
+      }
+
+      console.log(`Updating guide: ${page}...`);
+      const currentMdx = readContentFile(page);
+
+      const guidePrompt = `Update this guide page to reflect API changes in v${version}.
 
 Current MDX page:
 \`\`\`mdx
@@ -276,10 +280,16 @@ Rules:
 - Keep all existing prose that is still accurate
 - Output the COMPLETE updated MDX file (including frontmatter)`;
 
-    const updatedGuide = await callHaiku(SYSTEM_PROMPT, guidePrompt);
-    writeContentFile(page, updatedGuide);
-    console.log(`Updated: ${page}`);
+      const updatedGuide = await callHaiku(SYSTEM_PROMPT, guidePrompt);
+      writeContentFile(page, updatedGuide);
+      console.log(`Updated: ${page}`);
+    }
   }
+
+  console.log(`\nDoc generation complete for v${version}.`);
 }
 
-console.log(`\nDoc generation complete for v${version}.`);
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
