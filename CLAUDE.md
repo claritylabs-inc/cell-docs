@@ -109,20 +109,31 @@ Requires `ANTHROPIC_API_KEY` in `.env.local`.
 
 ### Required secrets
 
+Authentication uses a **GitHub App** (`Clarity Labs CI`) instead of PATs.
+
 | Secret | Repo | Purpose |
 |--------|------|---------|
-| `DOCS_REPO_PAT` | cell repo | PAT to trigger `repository_dispatch` on docs repo |
-| `GH_PACKAGES_TOKEN` | docs repo | PAT with `read:packages` for private cell package |
-| `ANTHROPIC_API_KEY` | docs repo | Anthropic API key for Claude Haiku doc generation |
+| `APP_ID` | cell repo + cell-docs | GitHub App ID |
+| `APP_PRIVATE_KEY` | cell repo + cell-docs | GitHub App private key (.pem) |
+| `ANTHROPIC_API_KEY` | cell-docs | Anthropic API key for Claude Haiku doc generation |
+| `NPM_TOKEN` | Vercel | GitHub PAT with `read:packages` for Vercel builds |
 
 ### Cell repo dispatch
 
 The cell repo needs a workflow (`.github/workflows/notify-docs.yml`) that sends a `repository_dispatch` to this repo on publish:
 ```yaml
+- name: Generate GitHub App token
+  id: app-token
+  uses: actions/create-github-app-token@v1
+  with:
+    app-id: ${{ secrets.APP_ID }}
+    private-key: ${{ secrets.APP_PRIVATE_KEY }}
+    owner: claritylabs-inc
+
 - uses: peter-evans/repository-dispatch@v3
   with:
-    token: ${{ secrets.DOCS_REPO_PAT }}
-    repository: claritylabs-inc/docs
+    token: ${{ steps.app-token.outputs.token }}
+    repository: claritylabs-inc/cell-docs
     event-type: cell-version-published
     client-payload: '{"version": "<version>"}'
 ```

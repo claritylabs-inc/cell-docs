@@ -16,6 +16,14 @@ jobs:
   update-docs:
     runs-on: ubuntu-latest
     steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: claritylabs-inc
+
       - name: Parse version
         id: semver
         run: |
@@ -48,7 +56,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -67,13 +75,13 @@ jobs:
           fi
           echo "old_types=$OLD_TYPES" >> $GITHUB_ENV
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Install new cell version
         run: |
           npm install @claritylabs-inc/cell@${{ steps.semver.outputs.version }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Commit dependency update on main
         run: |
