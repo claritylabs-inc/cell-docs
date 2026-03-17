@@ -9,24 +9,24 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://cell.claritylabs.inc"),
   title: {
     template: "%s | Cell",
-    default: "Cell — Insurance Intelligence Layer",
+    default: "Cell — AI SDK for Insurance",
   },
   description:
-    "The shared intelligence layer for AI working with insurance. Pure TypeScript, provider-agnostic.",
+    "Cell from Clarity Labs is an SDK for AI agents working with insurance.",
   icons: "/favicon.svg",
   openGraph: {
-    title: "Cell — Insurance Intelligence Layer",
+    title: "Cell — AI SDK for Insurance",
     description:
-      "The shared intelligence layer for AI working with insurance. Pure TypeScript, provider-agnostic.",
+      "Cell from Clarity Labs is an SDK for AI agents working with insurance.",
     type: "website",
     siteName: "Cell by Clarity Labs",
     url: "https://cell.claritylabs.inc",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cell — Insurance Intelligence Layer",
+    title: "Cell — AI SDK for Insurance",
     description:
-      "The shared intelligence layer for AI working with insurance. Pure TypeScript, provider-agnostic.",
+      "Cell from Clarity Labs is an SDK for AI agents working with insurance.",
   },
 };
 

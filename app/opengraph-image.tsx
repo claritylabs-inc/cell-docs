@@ -3,7 +3,7 @@ import { readFile } from "fs/promises";
 import { join } from "path";
 
 export const alt =
-  "Cell — The shared intelligence layer for AI working with insurance";
+  "Cell — AI SDK for Insurance";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -26,28 +26,30 @@ export default async function Image() {
           padding: "80px",
         }}
       >
-        {/* Logo + product name centered */}
+        {/* Cell {globe} AI SDK for Insurance */}
         <div
           style={{
             flex: 1,
             display: "flex",
-            flexDirection: "column",
             width: "100%",
             height: "100%",
             alignItems: "center",
             justifyContent: "center",
-            gap: "24px",
           }}
         >
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "20px",
+              gap: "24px",
+              fontSize: "72px",
+              color: "#111827",
+              letterSpacing: "-0.02em",
+              fontFamily: "Instrument Serif",
             }}
           >
-            {/* Globe icon */}
-            <svg width="72" height="72" viewBox="0 0 65 65" fill="none">
+            <span>Cell</span>
+            <svg width="56" height="56" viewBox="0 0 65 65" fill="none">
               <circle
                 cx="32.5"
                 cy="32.5"
@@ -61,28 +63,7 @@ export default async function Image() {
                 fill="#A0D2FA"
               />
             </svg>
-            {/* Product name */}
-            <span
-              style={{
-                fontSize: "96px",
-                color: "#111827",
-                letterSpacing: "-0.02em",
-                fontFamily: "Instrument Serif",
-              }}
-            >
-              Cell
-            </span>
-          </div>
-          {/* Subtitle */}
-          <div
-            style={{
-              fontSize: "28px",
-              color: "#8a8578",
-              fontFamily: "Instrument Serif",
-              letterSpacing: "-0.01em",
-            }}
-          >
-            The shared intelligence layer for AI working with insurance
+            <span>AI SDK for Insurance</span>
           </div>
         </div>
 

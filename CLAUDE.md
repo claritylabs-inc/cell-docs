@@ -2,7 +2,7 @@
 
 ## Project overview
 
-Documentation site for `@claritylabs-inc/cell` — the shared intelligence layer for AI working with insurance. Built with Next.js 16, fumadocs v16, and Tailwind CSS v4.
+Documentation site for `@claritylabs-inc/cell` — an SDK for AI agents working with insurance. Built with Next.js 16, fumadocs v16, and Tailwind CSS v4.
 
 ## Tech stack
 
