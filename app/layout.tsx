@@ -8,23 +8,23 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   metadataBase: new URL("https://cell.claritylabs.inc"),
   title: {
-    template: "%s | Cell",
-    default: "Cell — AI SDK for Insurance",
+    template: "%s",
+    default: "Cell from Clarity Labs",
   },
   description:
     "Cell from Clarity Labs is an SDK for AI agents working with insurance.",
   icons: "/favicon.svg",
   openGraph: {
-    title: "Cell — AI SDK for Insurance",
+    title: "Cell from Clarity Labs",
     description:
       "Cell from Clarity Labs is an SDK for AI agents working with insurance.",
     type: "website",
-    siteName: "Cell by Clarity Labs",
+    siteName: "Cell from Clarity Labs",
     url: "https://cell.claritylabs.inc",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cell — AI SDK for Insurance",
+    title: "Cell from Clarity Labs",
     description:
       "Cell from Clarity Labs is an SDK for AI agents working with insurance.",
   },
