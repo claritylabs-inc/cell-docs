@@ -1,0 +1,103 @@
+---
+title: Overview
+description: Use CL-SDK tools and documentation directly from AI coding assistants via MCP
+---
+
+import { Callout } from "@/components/ui/callout";
+import { Cards, Card } from "fumadocs-ui/components/card";
+
+The CL-SDK MCP server exposes SDK functions and documentation search as [Model Context Protocol](https://modelcontextprotocol.io/) tools. This lets AI coding assistants like Claude Code, Cursor, and Windsurf call CL-SDK functions and search these docs without leaving your editor.
+
+## What it provides
+
+- **Documentation search** — full-text search across all doc pages, read individual pages, list the doc tree
+- **Prompt builders** — generate system prompts, extraction prompts, and application field prompts
+- **Extraction pipeline** — classify documents, extract policies and quotes from PDFs
+- **PDF operations** — list form fields, fill AcroForms, overlay text on flat PDFs
+
+## Quick start
+
+The server lives in the `mcp/` directory of this repo. If you're using Claude Code, it auto-registers via `.claude/mcp.json` — just open the repo and the tools appear.
+
+For other clients, run:
+
+```bash
+npx tsx mcp/server.ts
+```
+
+The server communicates over stdio using the MCP protocol.
+
+<Callout type="info">
+  The MCP server requires Node.js 18+ and the repo's dependencies installed (`npm install`).
+</Callout>
+
+## Architecture
+
+```
+┌─────────────────────┐     stdio      ┌──────────────────────┐
+│  AI Assistant        │ ◄────────────► │  mcp/server.ts       │
+│  (Claude Code, etc.) │                │                      │
+└─────────────────────┘                │  ┌─ Doc tools ──────┐│
+                                        │  │ search_docs      ││
+                                        │  │ read_doc_page    ││
+                                        │  │ list_doc_sections││
+                                        │  └──────────────────┘│
+                                        │  ┌─ SDK tools ──────┐│
+                                        │  │ Prompt builders  ││
+                                        │  │ Extraction       ││
+                                        │  │ PDF operations   ││
+                                        │  └──────────────────┘│
+                                        │         │            │
+                                        │         ▼            │
+                                        │  @claritylabs-inc/   │
+                                        │  cl-sdk              │
+                                        └──────────────────────┘
+```
+
+The server is a single TypeScript file (`mcp/server.ts`) that:
+
+1. Imports functions from `@claritylabs-inc/cl-sdk`
+2. Reads `mcp/mcp-config.json` for model provider settings
+3. Registers 15 MCP tools across 4 categories
+4. Connects via `StdioServerTransport`
+
+## Client setup
+
+### Claude Code
+
+Already configured. The `.claude/mcp.json` file in the repo registers the server automatically:
+
+```json
+{
+  "mcpServers": {
+    "cl-sdk-docs": {
+      "command": "npx",
+      "args": ["tsx", "mcp/server.ts"],
+      "cwd": "."
+    }
+  }
+}
+```
+
+### Cursor / Windsurf
+
+Add to your MCP settings (usually `~/.cursor/mcp.json` or equivalent):
+
+```json
+{
+  "mcpServers": {
+    "cl-sdk-docs": {
+      "command": "npx",
+      "args": ["tsx", "mcp/server.ts"],
+      "cwd": "/path/to/cl-sdk-docs"
+    }
+  }
+}
+```
+
+Replace `/path/to/cl-sdk-docs` with the absolute path to this repo.
+
+<Cards>
+  <Card title="Configuration" description="Set up model providers and API keys." href="/docs/mcp-server/configuration" />
+  <Card title="Tools reference" description="Full list of all 15 MCP tools." href="/docs/mcp-server/tools" />
+</Cards>

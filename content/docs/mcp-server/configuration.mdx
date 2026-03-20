@@ -1,0 +1,93 @@
+---
+title: Configuration
+description: Configure model providers and API keys for the CL-SDK MCP server
+---
+
+import { Callout } from "@/components/ui/callout";
+import { Tabs, Tab } from "@/components/ui/tabs";
+
+## Model configuration
+
+The server reads `mcp/mcp-config.json` at startup to determine which model provider and model to use for extraction tools (`classify_document`, `extract_policy`, `extract_quote`).
+
+```json
+{
+  "provider": "anthropic",
+  "model": "claude-haiku-4-5-20251001",
+  "apiKey": "${ANTHROPIC_API_KEY}"
+}
+```
+
+### Fields
+
+| Field | Description | Default |
+|-------|-------------|---------|
+| `provider` | AI provider: `anthropic`, `openai`, or `google` | `anthropic` |
+| `model` | Model ID for the provider | `claude-haiku-4-5-20251001` |
+| `apiKey` | API key, supports `${ENV_VAR}` syntax | `${ANTHROPIC_API_KEY}` |
+
+### Environment variable expansion
+
+The `apiKey` field supports `${ENV_VAR}` syntax. The server resolves these from `process.env` at startup. This lets you keep secrets in your shell environment rather than in the config file.
+
+## Provider examples
+
+<Tabs items={["Anthropic", "OpenAI", "Google"]}>
+<Tab value="Anthropic">
+```json
+{
+  "provider": "anthropic",
+  "model": "claude-haiku-4-5-20251001",
+  "apiKey": "${ANTHROPIC_API_KEY}"
+}
+```
+
+Set the environment variable:
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+```
+</Tab>
+<Tab value="OpenAI">
+```json
+{
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "apiKey": "${OPENAI_API_KEY}"
+}
+```
+
+```bash
+export OPENAI_API_KEY=sk-...
+```
+</Tab>
+<Tab value="Google">
+```json
+{
+  "provider": "google",
+  "model": "gemini-2.0-flash",
+  "apiKey": "${GOOGLE_API_KEY}"
+}
+```
+
+```bash
+export GOOGLE_API_KEY=AI...
+```
+</Tab>
+</Tabs>
+
+## Fallback behavior
+
+If `mcp/mcp-config.json` is missing or unreadable, the server falls back to:
+
+- **Provider**: Anthropic
+- **Model**: `claude-haiku-4-5-20251001`
+- **API key**: `ANTHROPIC_API_KEY` environment variable
+
+<Callout type="warn">
+  Documentation tools and pure SDK tools (prompt builders, `apply_extracted`, etc.) work without any model configuration. Only the extraction and classification tools require a valid API key.
+</Callout>
+
+## Uniform model config
+
+The server uses `createUniformModelConfig()` from the SDK, which assigns the same model to all extraction pipeline roles (classification, metadata, sections, enrichment). For production use with large documents, consider using the SDK directly with per-role model configuration — see [Model configuration](/docs/getting-started/models).

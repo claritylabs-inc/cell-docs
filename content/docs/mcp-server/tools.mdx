@@ -1,0 +1,222 @@
+---
+title: Tools Reference
+description: Complete reference for all 15 MCP tools provided by the CL-SDK server
+---
+
+import { Callout } from "@/components/ui/callout";
+
+## Documentation tools
+
+These tools search and read the CL-SDK documentation. They require no model configuration.
+
+### `list_doc_sections`
+
+List all documentation sections and their pages.
+
+**Input**: none
+
+**Output**: JSON array of sections with `title`, `slug`, and `pages`.
+
+```json
+[
+  { "title": "Getting Started", "slug": "getting-started", "pages": ["quickstart", "architecture", "models"] },
+  { "title": "Document Extraction", "slug": "extraction", "pages": ["pipeline", "classification", "applying-results"] }
+]
+```
+
+### `search_docs`
+
+Full-text search across all MDX documentation pages. Returns top 5 matches ranked by relevance.
+
+**Input**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `query` | string | yes | Search query |
+| `section` | string | no | Limit to a section slug (e.g. `extraction`) |
+
+**Output**: Ranked results with title, slug, score, and a text excerpt around the match.
+
+### `read_doc_page`
+
+Read a specific documentation page by its slug.
+
+**Input**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `slug` | string | yes | Page slug (e.g. `getting-started/quickstart`) |
+
+**Output**: The page title and full MDX content.
+
+---
+
+## SDK prompt builders
+
+Pure functions that return prompt strings. No model or API key needed.
+
+### `build_agent_system_prompt`
+
+Generate an insurance-aware agent system prompt. Wraps `buildAgentSystemPrompt(ctx)`.
+
+**Input**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `platform` | `"email"` \| `"chat"` \| `"sms"` \| `"slack"` \| `"discord"` | yes | Communication platform |
+| `intent` | `"direct"` \| `"mediated"` \| `"observed"` | yes | Communication intent |
+| `siteUrl` | string | yes | Company website URL |
+| `companyName` | string | no | Company name |
+| `companyContext` | string | no | Company context details |
+| `userName` | string | no | Recipient name |
+| `coiHandling` | `"broker"` \| `"user"` \| `"member"` \| `"ignore"` | no | COI routing strategy |
+| `brokerName` | string | no | Broker company name |
+| `brokerContactName` | string | no | Broker contact name |
+| `brokerContactEmail` | string | no | Broker contact email |
+
+### `build_field_extraction_prompt`
+
+Get the application field extraction prompt. Wraps `buildFieldExtractionPrompt()`.
+
+**Input**: none
+
+### `build_auto_fill_prompt`
+
+Generate an auto-fill prompt for application fields. Wraps `buildAutoFillPrompt(fields, orgContext)`.
+
+**Input**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `fields` | `{ id, label, fieldType, section }[]` | yes | Application fields |
+| `orgContext` | `{ key, value, category }[]` | yes | Organization context |
+
+### `build_question_batch_prompt`
+
+Generate a batched question prompt for unfilled fields. Wraps `buildQuestionBatchPrompt(unfilledFields)`.
+
+**Input**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `unfilledFields` | array | yes | Fields with `id`, `fieldType`, `section`, `required`, and optional `label`, `text`, `condition` |
+
+---
+
+## Data transformation tools
+
+Map raw extraction output to structured fields. No model needed.
+
+### `apply_extracted`
+
+Map raw policy extraction JSON to structured fields. Wraps `applyExtracted(extracted)`.
+
+**Input**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `extracted` | any | yes | Raw JSON from `extractFromPdf` |
+
+**Output**: Structured object with `carrier`, `policyNumber`, `coverages`, `premium`, `effectiveDate`, etc.
+
+### `apply_extracted_quote`
+
+Map raw quote extraction JSON to structured fields. Wraps `applyExtractedQuote(extracted)`.
+
+**Input**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `extracted` | any | yes | Raw JSON from `extractQuoteFromPdf` |
+
+**Output**: Structured object with `carrier`, `quoteNumber`, `premiumBreakdown`, `subjectivities`, etc.
+
+---
+
+## Extraction tools
+
+These call the LLM-powered extraction pipeline. Requires a [configured model and API key](/docs/mcp-server/configuration).
+
+<Callout type="warn">
+  These tools make API calls to your configured provider. Each extraction may use multiple LLM calls (multi-pass pipeline). Monitor usage accordingly.
+</Callout>
+
+### `classify_document`
+
+Classify a PDF as a policy or quote. Wraps `classifyDocumentType(pdfBase64, options)`.
+
+**Input**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `pdfBase64` | string | yes | Base64-encoded PDF |
+
+**Output**: `{ documentType: "policy" | "quote", confidence: number, signals: string[] }`
+
+### `extract_policy`
+
+Full multi-pass policy extraction. Wraps `extractFromPdf(pdfBase64, options)`.
+
+**Input**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `pdfBase64` | string | yes | Base64-encoded PDF |
+
+**Output**: `{ rawText: string, extracted: any }` — pass `extracted` to `apply_extracted` for structured fields.
+
+### `extract_quote`
+
+Full multi-pass quote extraction. Wraps `extractQuoteFromPdf(pdfBase64, options)`.
+
+**Input**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `pdfBase64` | string | yes | Base64-encoded PDF |
+
+**Output**: `{ rawText: string, extracted: any }` — pass `extracted` to `apply_extracted_quote` for structured fields.
+
+---
+
+## PDF tools
+
+Direct PDF operations. No model needed.
+
+### `get_acro_form_fields`
+
+List all fillable AcroForm fields in a PDF. Wraps `getAcroFormFields(pdfDoc)`.
+
+**Input**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `pdfBase64` | string | yes | Base64-encoded PDF |
+
+**Output**: Array of `{ name, type, options? }` where type is `"text"`, `"checkbox"`, `"dropdown"`, or `"radio"`.
+
+### `fill_acro_form`
+
+Fill AcroForm fields and return the flattened PDF. Wraps `fillAcroForm(pdfBytes, mappings)`.
+
+**Input**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `pdfBase64` | string | yes | Base64-encoded PDF |
+| `mappings` | `{ acroFormName, value }[]` | yes | Field name to value mappings |
+
+**Output**: Base64-encoded PDF with fields filled and flattened.
+
+### `overlay_text_on_pdf`
+
+Overlay text at specified coordinates on a flat PDF. Wraps `overlayTextOnPdf(pdfBytes, overlays)`.
+
+**Input**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `pdfBase64` | string | yes | Base64-encoded PDF |
+| `overlays` | array | yes | Each with `page` (0-indexed), `x`, `y`, `text`, optional `fontSize` and `isCheckmark` |
+
+**Output**: Base64-encoded PDF with text overlaid.

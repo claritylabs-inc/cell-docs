@@ -2,6 +2,11 @@
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
 
+/* Prevent overscroll/bounce behavior */
+html, body {
+  overscroll-behavior: none;
+}
+
 /* =============================================================================
    Theme — Clarity Labs design language (matching email-experiment)
    ============================================================================= */
@@ -327,77 +332,7 @@ button[data-copy]:hover {
   color: var(--color-fd-muted-foreground) !important;
 }
 
-/* =============================================================================
-   Callouts — shadcn-style alerts
-   ============================================================================= */
-
-/* Target the callout container (has --callout-color inline style) */
-[style*="--callout-color"] {
-  border-radius: var(--radius-lg) !important;
-  border: 1px solid color-mix(in srgb, var(--callout-color) 20%, var(--color-fd-border)) !important;
-  background: color-mix(in srgb, var(--callout-color) 4%, var(--color-fd-background)) !important;
-  font-size: 0.8125rem;
-  box-shadow: none !important;
-  padding: 0.75rem 1rem !important;
-  padding-inline-start: 1rem !important;
-  gap: 0.5rem !important;
-}
-
-/* Hide the left accent bar */
-[style*="--callout-color"] > [role="none"] {
-  display: none !important;
-}
-
-/* Icon — outlined style instead of filled circle */
-[style*="--callout-color"] > svg {
-  width: 1rem !important;
-  height: 1rem !important;
-  min-width: 1rem;
-  fill: none !important;
-  color: var(--callout-color) !important;
-  stroke: var(--callout-color);
-  margin-top: 2px;
-}
-
-/* Body text container */
-[style*="--callout-color"] > .flex.flex-col {
-  gap: 0.25rem !important;
-}
-
-/* Title */
-[style*="--callout-color"] .font-medium {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-fd-foreground);
-}
-
-/* Description */
-[style*="--callout-color"] .text-fd-muted-foreground {
-  font-size: 0.8125rem;
-  line-height: 1.6;
-}
-
-/* Dark mode */
-.dark [style*="--callout-color"] {
-  background: color-mix(in srgb, var(--callout-color) 6%, var(--color-fd-background)) !important;
-  border-color: color-mix(in srgb, var(--callout-color) 15%, var(--color-fd-border)) !important;
-}
-
-/* =============================================================================
-   Tabs — matching email-experiment tab component
-   ============================================================================= */
-
-[role="tablist"] {
-  border-radius: var(--radius-lg);
-}
-
-[role="tab"] {
-  border-radius: var(--radius-md);
-  font-weight: 500;
-  font-size: 0.8125rem;
-  letter-spacing: -0.01em;
-  transition: all 150ms ease;
-}
+/* Callouts and Tabs use custom components — see components/ui/callout.tsx and components/ui/tabs.tsx */
 
 /* =============================================================================
    Sidebar — matching email-experiment app-sidebar

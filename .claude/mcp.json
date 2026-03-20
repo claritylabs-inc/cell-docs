@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "cl-sdk-docs": {
+      "command": "npx",
+      "args": ["tsx", "mcp/server.ts"],
+      "cwd": "."
+    }
+  }
+}
