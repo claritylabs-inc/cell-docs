@@ -8,7 +8,7 @@ import { Tabs, Tab } from "@/components/ui/tabs";
 
 ## Model configuration
 
-The server reads `mcp/mcp-config.json` at startup to determine which model provider and model to use for extraction tools (`classify_document`, `extract_policy`, `extract_quote`).
+The extraction tools (`classify_document`, `extract_policy`, `extract_quote`) need a configured model and API key. The server supports two configuration methods: environment variables (simplest) or a config file.
 
 ```json
 {
@@ -76,13 +76,23 @@ export GOOGLE_API_KEY=AI...
 </Tab>
 </Tabs>
 
-## Fallback behavior
+## Environment variables
 
-If `mcp/mcp-config.json` is missing or unreadable, the server falls back to:
+Without a config file, the server reads directly from environment variables:
 
-- **Provider**: Anthropic
-- **Model**: `claude-haiku-4-5-20251001`
-- **API key**: `ANTHROPIC_API_KEY` environment variable
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `CL_MCP_PROVIDER` | AI provider: `anthropic`, `openai`, or `google` | `anthropic` |
+| `CL_MCP_MODEL` | Model ID | `claude-haiku-4-5-20251001` |
+| `ANTHROPIC_API_KEY` | Anthropic API key (checked first) | — |
+| `OPENAI_API_KEY` | OpenAI API key (fallback) | — |
+| `GOOGLE_API_KEY` | Google API key (fallback) | — |
+
+The simplest setup — just export your API key and the defaults work:
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+```
 
 <Callout type="warn">
   Documentation tools and pure SDK tools (prompt builders, `apply_extracted`, etc.) work without any model configuration. Only the extraction and classification tools require a valid API key.

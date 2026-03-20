@@ -17,25 +17,25 @@ The CL-SDK MCP server exposes SDK functions and documentation search as [Model C
 
 ## Quick start
 
-The server lives in the `mcp/` directory of this repo. If you're using Claude Code, it auto-registers via `.claude/mcp.json` — just open the repo and the tools appear.
-
-For other clients, run:
+Install the MCP server package:
 
 ```bash
-npx tsx mcp/server.ts
+npm install -g @claritylabs-inc/cl-sdk-mcp
 ```
 
-The server communicates over stdio using the MCP protocol.
+Then add it to your MCP client. See [Client setup](#client-setup) below.
 
 <Callout type="info">
-  The MCP server requires Node.js 18+ and the repo's dependencies installed (`npm install`).
+  Published to GitHub Packages. You need a `.npmrc` pointing `@claritylabs-inc` to `https://npm.pkg.github.com` with a valid token.
 </Callout>
 
 ## Architecture
 
+The server is a standalone package (`@claritylabs-inc/cl-sdk-mcp`) that bundles the documentation content and depends on `@claritylabs-inc/cl-sdk` for SDK functionality.
+
 ```
 ┌─────────────────────┐     stdio      ┌──────────────────────┐
-│  AI Assistant        │ ◄────────────► │  mcp/server.ts       │
+│  AI Assistant        │ ◄────────────► │  cl-sdk-mcp          │
 │  (Claude Code, etc.) │                │                      │
 └─────────────────────┘                │  ┌─ Doc tools ──────┐│
                                         │  │ search_docs      ││
@@ -54,30 +54,29 @@ The server communicates over stdio using the MCP protocol.
                                         └──────────────────────┘
 ```
 
-The server is a single TypeScript file (`mcp/server.ts`) that:
-
-1. Imports functions from `@claritylabs-inc/cl-sdk`
-2. Reads `mcp/mcp-config.json` for model provider settings
-3. Registers 15 MCP tools across 4 categories
-4. Connects via `StdioServerTransport`
+1. Documentation is bundled as `docs-bundle.json` at publish time — no filesystem access needed
+2. SDK functions are imported from `@claritylabs-inc/cl-sdk` (installed as a dependency)
+3. Model config is read from `mcp-config.json` or environment variables
+4. Communicates via `StdioServerTransport`
 
 ## Client setup
 
 ### Claude Code
 
-Already configured. The `.claude/mcp.json` file in the repo registers the server automatically:
+Add to your project's `.claude/mcp.json` or global `~/.claude/mcp.json`:
 
 ```json
 {
   "mcpServers": {
-    "cl-sdk-docs": {
+    "cl-sdk": {
       "command": "npx",
-      "args": ["tsx", "mcp/server.ts"],
-      "cwd": "."
+      "args": ["@claritylabs-inc/cl-sdk-mcp"]
     }
   }
 }
 ```
+
+If you're working in the `cl-sdk-docs` repo directly, the `.claude/mcp.json` in the repo auto-registers it.
 
 ### Cursor / Windsurf
 
@@ -86,16 +85,21 @@ Add to your MCP settings (usually `~/.cursor/mcp.json` or equivalent):
 ```json
 {
   "mcpServers": {
-    "cl-sdk-docs": {
+    "cl-sdk": {
       "command": "npx",
-      "args": ["tsx", "mcp/server.ts"],
-      "cwd": "/path/to/cl-sdk-docs"
+      "args": ["@claritylabs-inc/cl-sdk-mcp"]
     }
   }
 }
 ```
 
-Replace `/path/to/cl-sdk-docs` with the absolute path to this repo.
+### Other MCP clients
+
+Any client that supports stdio servers:
+
+```bash
+npx @claritylabs-inc/cl-sdk-mcp
+```
 
 <Cards>
   <Card title="Configuration" description="Set up model providers and API keys." href="/docs/mcp-server/configuration" />

@@ -1,9 +1,9 @@
+#!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import * as fs from "fs";
 import * as path from "path";
-import matter from "gray-matter";
 import { PDFDocument } from "pdf-lib";
 import type { LanguageModel } from "ai";
 
@@ -25,10 +25,44 @@ import {
 } from "@claritylabs-inc/cl-sdk";
 
 // ---------------------------------------------------------------------------
-// Config
+// Docs bundle
 // ---------------------------------------------------------------------------
 
-const DOCS_ROOT = path.resolve(__dirname, "../content/docs");
+interface DocPage {
+  slug: string;
+  title: string;
+  description: string;
+  content: string;
+}
+
+interface DocSection {
+  title: string;
+  slug: string;
+  pages: string[];
+}
+
+interface DocsBundle {
+  sections: DocSection[];
+  pages: DocPage[];
+}
+
+function loadDocsBundle(): DocsBundle {
+  const bundlePath = path.resolve(__dirname, "docs-bundle.json");
+  if (!fs.existsSync(bundlePath)) {
+    console.error(
+      "Warning: docs-bundle.json not found. Run `npx tsx mcp/build-docs.ts` to generate it.\n" +
+      "Doc search/read tools will return empty results."
+    );
+    return { sections: [], pages: [] };
+  }
+  return JSON.parse(fs.readFileSync(bundlePath, "utf-8")) as DocsBundle;
+}
+
+const docs = loadDocsBundle();
+
+// ---------------------------------------------------------------------------
+// Config
+// ---------------------------------------------------------------------------
 
 interface McpConfig {
   provider: string;
@@ -37,18 +71,19 @@ interface McpConfig {
 }
 
 function loadConfig(): McpConfig {
+  // Check for config file next to server
   const configPath = path.resolve(__dirname, "mcp-config.json");
   try {
     const raw = fs.readFileSync(configPath, "utf-8");
     const cfg = JSON.parse(raw) as McpConfig;
-    // Resolve ${ENV_VAR} references in apiKey
     cfg.apiKey = cfg.apiKey.replace(/\$\{(\w+)\}/g, (_, name) => process.env[name] ?? "");
     return cfg;
   } catch {
+    // Fall back to env vars
     return {
-      provider: "anthropic",
-      model: "claude-haiku-4-5-20251001",
-      apiKey: process.env.ANTHROPIC_API_KEY ?? "",
+      provider: process.env.CL_MCP_PROVIDER ?? "anthropic",
+      model: process.env.CL_MCP_MODEL ?? "claude-haiku-4-5-20251001",
+      apiKey: process.env.ANTHROPIC_API_KEY ?? process.env.OPENAI_API_KEY ?? process.env.GOOGLE_API_KEY ?? "",
     };
   }
 }
@@ -76,88 +111,43 @@ async function createModel(cfg: McpConfig): Promise<LanguageModel> {
 }
 
 // ---------------------------------------------------------------------------
-// Doc helpers
+// Doc search helpers
 // ---------------------------------------------------------------------------
 
-function walkMetaJson(dir: string): { title: string; slug: string; pages: string[] }[] {
-  const sections: { title: string; slug: string; pages: string[] }[] = [];
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    const metaPath = path.join(dir, entry.name, "meta.json");
-    if (fs.existsSync(metaPath)) {
-      try {
-        const meta = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
-        sections.push({
-          title: meta.title ?? entry.name,
-          slug: entry.name,
-          pages: meta.pages ?? [],
-        });
-      } catch {}
-    }
-  }
-  return sections;
-}
-
-function getAllMdxFiles(dir: string, base = ""): { slug: string; filePath: string }[] {
-  const results: { slug: string; filePath: string }[] = [];
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      results.push(...getAllMdxFiles(fullPath, base ? `${base}/${entry.name}` : entry.name));
-    } else if (entry.name.endsWith(".mdx")) {
-      const slug = base
-        ? entry.name === "index.mdx"
-          ? base
-          : `${base}/${entry.name.replace(/\.mdx$/, "")}`
-        : entry.name.replace(/\.mdx$/, "");
-      results.push({ slug, filePath: fullPath });
-    }
-  }
-  return results;
-}
-
-function searchMdxFiles(
+function searchDocs(
   query: string,
   section?: string
 ): { slug: string; title: string; excerpt: string; score: number }[] {
-  const files = getAllMdxFiles(DOCS_ROOT);
   const q = query.toLowerCase();
   const wordBoundary = new RegExp(`\\b${q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i");
 
   const results: { slug: string; title: string; excerpt: string; score: number }[] = [];
 
-  for (const { slug, filePath } of files) {
-    if (section && !slug.startsWith(section + "/") && slug !== section) continue;
+  for (const page of docs.pages) {
+    if (section && !page.slug.startsWith(section + "/") && page.slug !== section) continue;
 
-    const raw = fs.readFileSync(filePath, "utf-8");
-    const { data, content } = matter(raw);
-    const title = (data.title as string) ?? slug;
-    const lower = content.toLowerCase();
-
+    const lower = page.content.toLowerCase();
     if (!lower.includes(q)) continue;
 
     let score = 0;
-    // Count occurrences
     let idx = 0;
     while ((idx = lower.indexOf(q, idx)) !== -1) {
       score++;
       idx += q.length;
     }
-    // Bonus for word boundary matches
-    const wbMatches = content.match(wordBoundary);
+    const wbMatches = page.content.match(wordBoundary);
     if (wbMatches) score += wbMatches.length * 2;
-    // Bonus for title match
-    if (title.toLowerCase().includes(q)) score += 10;
+    if (page.title.toLowerCase().includes(q)) score += 10;
 
-    // Extract excerpt around first match
     const firstIdx = lower.indexOf(q);
     const start = Math.max(0, firstIdx - 100);
-    const end = Math.min(content.length, firstIdx + q.length + 100);
-    const excerpt = (start > 0 ? "..." : "") + content.slice(start, end).trim() + (end < content.length ? "..." : "");
+    const end = Math.min(page.content.length, firstIdx + q.length + 100);
+    const excerpt =
+      (start > 0 ? "..." : "") +
+      page.content.slice(start, end).trim() +
+      (end < page.content.length ? "..." : "");
 
-    results.push({ slug, title, excerpt, score });
+    results.push({ slug: page.slug, title: page.title, excerpt, score });
   }
 
   results.sort((a, b) => b.score - a.score);
@@ -180,9 +170,8 @@ server.tool(
   "List all documentation sections and their pages",
   {},
   async () => {
-    const sections = walkMetaJson(DOCS_ROOT);
     return {
-      content: [{ type: "text", text: JSON.stringify(sections, null, 2) }],
+      content: [{ type: "text", text: JSON.stringify(docs.sections, null, 2) }],
     };
   }
 );
@@ -195,7 +184,7 @@ server.tool(
     section: z.string().optional().describe("Limit to section slug (e.g. 'extraction', 'agent')"),
   },
   async ({ query, section }) => {
-    const results = searchMdxFiles(query, section);
+    const results = searchDocs(query, section);
     if (results.length === 0) {
       return { content: [{ type: "text", text: "No results found." }] };
     }
@@ -213,24 +202,15 @@ server.tool(
     slug: z.string().describe("Page slug relative to docs root"),
   },
   async ({ slug }) => {
-    // Try slug.mdx, slug/index.mdx
-    const candidates = [
-      path.join(DOCS_ROOT, `${slug}.mdx`),
-      path.join(DOCS_ROOT, slug, "index.mdx"),
-    ];
-    for (const filePath of candidates) {
-      if (fs.existsSync(filePath)) {
-        const raw = fs.readFileSync(filePath, "utf-8");
-        const { data, content } = matter(raw);
-        const title = (data.title as string) ?? slug;
-        return {
-          content: [{ type: "text", text: `# ${title}\n\n${content}` }],
-        };
-      }
+    const page = docs.pages.find((p) => p.slug === slug);
+    if (!page) {
+      return {
+        content: [{ type: "text", text: `Page not found: ${slug}` }],
+        isError: true,
+      };
     }
     return {
-      content: [{ type: "text", text: `Page not found: ${slug}` }],
-      isError: true,
+      content: [{ type: "text", text: `# ${page.title}\n\n${page.content}` }],
     };
   }
 );

@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   update-docs:
@@ -178,6 +179,15 @@ jobs:
 
           git add vercel.json
           git commit -m "chore: sync vercel rewrites for v${{ steps.semver.outputs.version }}" || echo "No rewrite changes"
+
+      - name: Rebuild and publish MCP server
+        run: |
+          npx tsx mcp/build-docs.ts
+          cd mcp
+          npm version ${{ steps.semver.outputs.version }} --no-git-tag-version --allow-same-version
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Push version branch
         run: |
