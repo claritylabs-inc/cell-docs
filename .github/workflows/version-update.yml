@@ -164,7 +164,7 @@ jobs:
 
           FIRST=true
           for BRANCH in $BRANCHES; do
-            SLUG=$(echo "$BRANCH" | tr '.' '')
+            SLUG=$(echo "$BRANCH" | tr -d '.')
             if [ "$FIRST" = true ]; then
               FIRST=false
             else
