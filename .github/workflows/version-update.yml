@@ -187,7 +187,7 @@ jobs:
           npm version ${{ steps.semver.outputs.version }} --no-git-tag-version --allow-same-version
           npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ steps.app-token.outputs.token }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push version branch
         run: |
