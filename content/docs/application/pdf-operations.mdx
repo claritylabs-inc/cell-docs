@@ -3,7 +3,7 @@ title: PDF Operations
 description: Fill AcroForm fields and overlay text on flat PDFs
 ---
 
-Cell provides two modes for writing data onto PDFs using `pdf-lib`: **AcroForm filling** for fillable PDFs and **text overlay** for flat/scanned PDFs.
+CL-0 SDK provides two modes for writing data onto PDFs using `pdf-lib`: **AcroForm filling** for fillable PDFs and **text overlay** for flat/scanned PDFs.
 
 ## AcroForm fields
 
@@ -13,7 +13,7 @@ Enumerate all fillable form fields in a PDF:
 
 ```typescript
 import { PDFDocument } from "pdf-lib";
-import { getAcroFormFields } from "@claritylabs-inc/cell";
+import { getAcroFormFields } from "@claritylabs-inc/cl-sdk";
 
 const pdfDoc = await PDFDocument.load(pdfBytes);
 const fields = getAcroFormFields(pdfDoc);
@@ -34,7 +34,7 @@ Returns an empty array if the PDF has no AcroForm.
 Fill AcroForm fields by name and flatten the form (makes fields non-editable):
 
 ```typescript
-import { fillAcroForm, type FieldMapping } from "@claritylabs-inc/cell";
+import { fillAcroForm, type FieldMapping } from "@claritylabs-inc/cl-sdk";
 
 const mappings: FieldMapping[] = [
   { acroFormName: "insured_name", value: "Acme Corp" },
@@ -55,7 +55,7 @@ Fields not found in the PDF or values not in dropdown/radio options are silently
 For flat or scanned PDFs without form fields, overlay text at specific coordinates:
 
 ```typescript
-import { overlayTextOnPdf, type TextOverlay } from "@claritylabs-inc/cell";
+import { overlayTextOnPdf, type TextOverlay } from "@claritylabs-inc/cl-sdk";
 
 const overlays: TextOverlay[] = [
   {

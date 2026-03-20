@@ -4,12 +4,12 @@ import { resolve } from "path";
 
 const withMDX = createMDX();
 
-const cellPkgPath = resolve("node_modules/@claritylabs-inc/cell/package.json");
-const cellVersion = JSON.parse(readFileSync(cellPkgPath, "utf-8")).version;
+const sdkPkgPath = resolve("node_modules/@claritylabs-inc/cl-sdk/package.json");
+const sdkVersion = JSON.parse(readFileSync(sdkPkgPath, "utf-8")).version;
 
 export default withMDX({
   reactStrictMode: true,
   env: {
-    CELL_VERSION: cellVersion,
+    CL_SDK_VERSION: sdkVersion,
   },
 });

@@ -3,13 +3,13 @@ title: Agent System Prompt
 description: Build composable, insurance-aware system prompts for conversational agents
 ---
 
-Cell provides a modular prompt system for building insurance-aware conversational agents. Prompts are composed from independent modules that adapt to the platform and communication intent.
+CL-0 SDK provides a modular prompt system for building insurance-aware conversational agents. Prompts are composed from independent modules that adapt to the platform and communication intent.
 
 ## Quick start
 
 ```typescript
-import { buildAgentSystemPrompt } from "@claritylabs-inc/cell";
-import type { AgentContext } from "@claritylabs-inc/cell";
+import { buildAgentSystemPrompt } from "@claritylabs-inc/cl-sdk";
+import type { AgentContext } from "@claritylabs-inc/cl-sdk";
 
 const ctx: AgentContext = {
   platform: "email",
@@ -73,7 +73,7 @@ import {
   buildQuotesPoliciesPrompt,
   buildConversationMemoryGuidance,
   buildIntentPrompt,
-} from "@claritylabs-inc/cell";
+} from "@claritylabs-inc/cl-sdk";
 ```
 
 ### Custom composition
@@ -94,7 +94,7 @@ const customPrompt = [
 Build ranked document context for agent responses:
 
 ```typescript
-import { buildDocumentContext } from "@claritylabs-inc/cell";
+import { buildDocumentContext } from "@claritylabs-inc/cl-sdk";
 
 const context = buildDocumentContext(documents, "What's my GL limit?");
 // Returns policies/quotes ranked by relevance to the query
@@ -105,7 +105,7 @@ const context = buildDocumentContext(documents, "What's my GL limit?");
 Add conversation history context:
 
 ```typescript
-import { buildConversationMemoryContext } from "@claritylabs-inc/cell";
+import { buildConversationMemoryContext } from "@claritylabs-inc/cl-sdk";
 
 const memoryContext = buildConversationMemoryContext(previousConversations);
 ```
@@ -115,7 +115,7 @@ const memoryContext = buildConversationMemoryContext(previousConversations);
 Classify incoming messages before routing to the agent:
 
 ```typescript
-import { buildClassifyMessagePrompt } from "@claritylabs-inc/cell";
+import { buildClassifyMessagePrompt } from "@claritylabs-inc/cl-sdk";
 
 const classificationPrompt = buildClassifyMessagePrompt("email");
 // Returns a prompt that classifies whether a message is insurance-related

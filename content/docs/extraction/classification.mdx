@@ -3,12 +3,12 @@ title: Document Classification
 description: Classify insurance documents as policies or quotes
 ---
 
-Before running the full extraction pipeline, Cell can classify a document to determine whether it's a policy or a quote. This drives which extraction flow to use.
+Before running the full extraction pipeline, CL-0 SDK can classify a document to determine whether it's a policy or a quote. This drives which extraction flow to use.
 
 ## Basic usage
 
 ```typescript
-import { classifyDocumentType } from "@claritylabs-inc/cell";
+import { classifyDocumentType } from "@claritylabs-inc/cl-sdk";
 
 const { documentType, confidence, signals } = await classifyDocumentType(pdfBase64);
 
@@ -50,7 +50,7 @@ import {
   extractQuoteFromPdf,
   applyExtracted,
   applyExtractedQuote,
-} from "@claritylabs-inc/cell";
+} from "@claritylabs-inc/cl-sdk";
 
 const { documentType } = await classifyDocumentType(pdfBase64);
 

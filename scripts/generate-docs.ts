@@ -35,7 +35,7 @@ const ROOT = process.cwd();
 const CONTENT = join(ROOT, "content", "docs");
 const NEW_TYPES_PATH = resolve(
   ROOT,
-  "node_modules/@claritylabs-inc/cell/dist/index.d.ts"
+  "node_modules/@claritylabs-inc/cl-sdk/dist/index.d.ts"
 );
 
 // ---------------------------------------------------------------------------
@@ -66,7 +66,7 @@ async function callHaiku(
   return text;
 }
 
-const SYSTEM_PROMPT = `You are a technical documentation writer for a TypeScript library called Cell.
+const SYSTEM_PROMPT = `You are a technical documentation writer for a TypeScript library called CL-SDK (branded as CL-0 SDK for major version 0).
 You write MDX documentation using fumadocs conventions.
 
 Rules:
@@ -135,10 +135,10 @@ If there are no changes, say "No changes detected."`;
     ? readContentFile(changelogPath)
     : `---
 title: Changelog
-description: Release history for @claritylabs-inc/cell
+description: Release history for @claritylabs-inc/cl-sdk
 ---
 
-All notable changes to \`@claritylabs-inc/cell\` will be documented here. This page is automatically updated when new versions are published.
+All notable changes to \`@claritylabs-inc/cl-sdk\` will be documented here. This page is automatically updated when new versions are published.
 `;
 
   const today = new Date().toISOString().split("T")[0];

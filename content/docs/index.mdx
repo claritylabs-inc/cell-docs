@@ -1,5 +1,5 @@
 ---
-title: Cell from Clarity Labs
+title: CL-0 SDK
 description: An SDK for AI agents working with insurance
 ---
 
@@ -7,7 +7,7 @@ import { Cards, Card } from "fumadocs-ui/components/card";
 
 [Clarity Labs](https://claritylabs.inc) is an applied AI research lab building the infrastructure for AI to work safely with insurance.
 
-Cell is an SDK for AI agents working with insurance. Any product or agent can import it to understand, reason about, and act on insurance. Provider-agnostic — works with Anthropic, OpenAI, Google, or any model via the [Vercel AI SDK](https://sdk.vercel.ai).
+CL-0 SDK is an SDK for AI agents working with insurance. Any product or agent can import it to understand, reason about, and act on insurance. Provider-agnostic — works with Anthropic, OpenAI, Google, or any model via the [Vercel AI SDK](https://sdk.vercel.ai).
 
 ## Capabilities
 
@@ -20,11 +20,11 @@ Cell is an SDK for AI agents working with insurance. Any product or agent can im
 ## Install
 
 ```bash
-npm install @claritylabs-inc/cell ai pdf-lib
+npm install @claritylabs-inc/cl-sdk ai pdf-lib
 ```
 
 ```typescript
-import { classifyDocumentType, extractFromPdf, applyExtracted } from "@claritylabs-inc/cell";
+import { classifyDocumentType, extractFromPdf, applyExtracted } from "@claritylabs-inc/cl-sdk";
 
 const { documentType } = await classifyDocumentType(pdfBase64);
 const { extracted } = await extractFromPdf(pdfBase64);
@@ -34,7 +34,7 @@ const fields = applyExtracted(extracted);
 ## Get started
 
 <Cards>
-  <Card title="Quickstart" description="Install Cell and run your first extraction in minutes." href="/docs/getting-started/quickstart" />
+  <Card title="Quickstart" description="Install CL-0 SDK and run your first extraction in minutes." href="/docs/getting-started/quickstart" />
   <Card title="Architecture" description="Understand the multi-pass extraction pipeline and how components fit together." href="/docs/getting-started/architecture" />
   <Card title="Model Configuration" description="Configure models per pipeline pass — or bring any provider." href="/docs/getting-started/models" />
   <Card title="API Reference" description="Full reference for every exported function and type." href="/docs/api-reference/extraction" />

@@ -1,8 +1,8 @@
-# Cell Documentation Site
+# CL-SDK Documentation Site
 
 ## Project overview
 
-Documentation site for `@claritylabs-inc/cell` — an SDK for AI agents working with insurance. Built with Next.js 16, fumadocs v16, and Tailwind CSS v4.
+Documentation site for `@claritylabs-inc/cl-sdk` — an SDK for AI agents working with insurance. Built with Next.js 16, fumadocs v16, and Tailwind CSS v4.
 
 ## Tech stack
 
@@ -18,11 +18,11 @@ Documentation site for `@claritylabs-inc/cell` — an SDK for AI agents working 
 - `app/docs/layout.tsx` — Docs layout with Clarity Labs globe logo and nav config
 - `app/docs/[[...slug]]/page.tsx` — Page renderer using DocsPage/DocsBody
 - `lib/source.ts` — Fumadocs loader (imports from `@/.source/server`)
-- `lib/versions.ts` — Version config (current version + all version URLs)
+- `lib/versions.ts` — Version config (current version, major version, all version URLs)
 - `components/version-select.tsx` — Sidebar version dropdown component
 - `source.config.ts` — MDX collection definition
 - `components/ui/dropdown-menu.tsx` — shadcn dropdown menu (base-ui)
-- `next.config.ts` — Next.js config wrapped with `createMDX()`, injects `CELL_VERSION` env var
+- `next.config.ts` — Next.js config wrapped with `createMDX()`, injects `CL_SDK_VERSION` env var
 - `content/docs/` — All MDX documentation pages
 - `content/docs/meta.json` — Root sidebar navigation (uses `"root": true`)
 - `content/docs/*/meta.json` — Section navigation with `title` and `pages` array
@@ -55,6 +55,10 @@ content/docs/
 - Do NOT use separator entries (`---Title---`) in meta.json — they cause duplication
 - The root `meta.json` uses `"root": true` to avoid showing a "Documentation" wrapper
 
+## Branding
+
+The product is branded as "CL-{major} SDK" where `{major}` is the major version number (e.g., "CL-0 SDK" for version 0.x.x). The package name is `@claritylabs-inc/cl-sdk`.
+
 ## Design system
 
 Colors match the Clarity Labs design language from email-experiment:
@@ -67,23 +71,23 @@ Colors match the Clarity Labs design language from email-experiment:
 
 ## Versioning
 
-Each docs version lives on a separate git branch. The version is auto-read from `@claritylabs-inc/cell` package at build time via `next.config.ts`.
+Each docs version lives on a separate git branch. The version is auto-read from `@claritylabs-inc/cl-sdk` package at build time via `next.config.ts`.
 
-- **Version source**: `@claritylabs-inc/cell` package.json → `CELL_VERSION` env var → `lib/versions.ts`
-- **Config**: `lib/versions.ts` defines `CURRENT_VERSION` and the `versions` array
+- **Version source**: `@claritylabs-inc/cl-sdk` package.json → `CL_SDK_VERSION` env var → `lib/versions.ts`
+- **Config**: `lib/versions.ts` defines `CURRENT_VERSION`, `MAJOR_VERSION`, and the `versions` array
 - **Dropdown**: `components/version-select.tsx` renders in the sidebar banner (shadcn dropdown via `@base-ui/react`)
-- **URL env var**: `NEXT_PUBLIC_DOCS_BASE_URL` (defaults to `https://cell.claritylabs.inc/docs`, links become `{base}/v0.2` etc.)
+- **URL env var**: `NEXT_PUBLIC_DOCS_BASE_URL` (defaults to `https://cl-sdk.claritylabs.inc/docs`, links become `{base}/v0.2` etc.)
 
 **To release a new version:**
 1. Create a branch from main: `git checkout -b v0.X`
 2. On `main`, update `lib/versions.ts`: add the old version to the array
-3. On the version branch, pin the `@claritylabs-inc/cell` dependency to the correct version
+3. On the version branch, pin the `@claritylabs-inc/cl-sdk` dependency to the correct version
 4. Deploy each branch to its respective URL with the appropriate env vars
 
 ## Auto-versioning & AI doc generation
 
-When a new `@claritylabs-inc/cell` version is published, a GitHub Actions workflow automatically:
-1. Updates the cell dependency on main
+When a new `@claritylabs-inc/cl-sdk` version is published, a GitHub Actions workflow automatically:
+1. Updates the cl-sdk dependency on main
 2. Creates/updates the version branch (e.g. `v0.3`)
 3. Runs `scripts/generate-docs.ts` which uses Claude Haiku (via Vercel AI SDK) to:
    - Diff old vs new `.d.ts` exports
@@ -113,14 +117,14 @@ Authentication uses a **GitHub App** (`Clarity Labs CI`) instead of PATs.
 
 | Secret | Repo | Purpose |
 |--------|------|---------|
-| `APP_ID` | cell repo + cell-docs | GitHub App ID |
-| `APP_PRIVATE_KEY` | cell repo + cell-docs | GitHub App private key (.pem) |
-| `ANTHROPIC_API_KEY` | cell-docs | Anthropic API key for Claude Haiku doc generation |
+| `APP_ID` | cl-sdk repo + cl-sdk-docs | GitHub App ID |
+| `APP_PRIVATE_KEY` | cl-sdk repo + cl-sdk-docs | GitHub App private key (.pem) |
+| `ANTHROPIC_API_KEY` | cl-sdk-docs | Anthropic API key for Claude Haiku doc generation |
 | `NPM_TOKEN` | Vercel | GitHub PAT with `read:packages` for Vercel builds |
 
-### Cell repo dispatch
+### CL-SDK repo dispatch
 
-The cell repo needs a workflow (`.github/workflows/notify-docs.yml`) that sends a `repository_dispatch` to this repo on publish:
+The cl-sdk repo needs a workflow (`.github/workflows/notify-docs.yml`) that sends a `repository_dispatch` to this repo on publish:
 ```yaml
 - name: Generate GitHub App token
   id: app-token
@@ -133,8 +137,8 @@ The cell repo needs a workflow (`.github/workflows/notify-docs.yml`) that sends 
 - uses: peter-evans/repository-dispatch@v3
   with:
     token: ${{ steps.app-token.outputs.token }}
-    repository: claritylabs-inc/cell-docs
-    event-type: cell-version-published
+    repository: claritylabs-inc/cl-sdk-docs
+    event-type: cl-sdk-version-published
     client-payload: '{"version": "<version>"}'
 ```
 

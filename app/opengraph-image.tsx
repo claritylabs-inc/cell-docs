@@ -3,7 +3,7 @@ import { readFile } from "fs/promises";
 import { join } from "path";
 
 export const alt =
-  "Cell — AI SDK for Insurance";
+  "CL-0 SDK — AI SDK for Insurance";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -26,7 +26,7 @@ export default async function Image() {
           padding: "80px",
         }}
       >
-        {/* Cell {globe} AI SDK for Insurance */}
+        {/* CL-0 SDK {globe} AI SDK for Insurance */}
         <div
           style={{
             flex: 1,
@@ -48,7 +48,7 @@ export default async function Image() {
               fontFamily: "Instrument Serif",
             }}
           >
-            <span>Cell</span>
+            <span>CL-0 SDK</span>
             <svg width="56" height="56" viewBox="0 0 65 65" fill="none">
               <circle
                 cx="32.5"
@@ -75,7 +75,7 @@ export default async function Image() {
             fontFamily: "Instrument Serif",
           }}
         >
-          cell.claritylabs.inc
+          cl-sdk.claritylabs.inc
         </div>
       </div>
     ),

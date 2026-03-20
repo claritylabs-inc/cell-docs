@@ -8,7 +8,7 @@ The extraction pipeline returns raw JSON from the AI model. The `applyExtracted`
 ## Policies
 
 ```typescript
-import { extractFromPdf, applyExtracted } from "@claritylabs-inc/cell";
+import { extractFromPdf, applyExtracted } from "@claritylabs-inc/cl-sdk";
 
 const { extracted } = await extractFromPdf(pdfBase64);
 const fields = applyExtracted(extracted);
@@ -42,7 +42,7 @@ const fields = applyExtracted(extracted);
 ## Quotes
 
 ```typescript
-import { extractQuoteFromPdf, applyExtractedQuote } from "@claritylabs-inc/cell";
+import { extractQuoteFromPdf, applyExtractedQuote } from "@claritylabs-inc/cl-sdk";
 
 const { extracted } = await extractQuoteFromPdf(pdfBase64);
 const fields = applyExtractedQuote(extracted);

@@ -3,7 +3,7 @@ title: Tool Definitions
 description: Schema-only tool definitions for agent function calling
 ---
 
-Cell exports Claude `tool_use`-compatible tool schemas for common insurance agent operations. These are **schema-only** — Cell provides the definitions, and consumers implement the execution logic.
+CL-0 SDK exports Claude `tool_use`-compatible tool schemas for common insurance agent operations. These are **schema-only** — CL-0 SDK provides the definitions, and consumers implement the execution logic.
 
 ## Available tools
 
@@ -12,7 +12,7 @@ Cell exports Claude `tool_use`-compatible tool schemas for common insurance agen
 Search and retrieve insurance documents by ID, policy number, carrier, or free-text query.
 
 ```typescript
-import { DOCUMENT_LOOKUP_TOOL } from "@claritylabs-inc/cell";
+import { DOCUMENT_LOOKUP_TOOL } from "@claritylabs-inc/cl-sdk";
 ```
 
 **Input schema:**
@@ -28,7 +28,7 @@ import { DOCUMENT_LOOKUP_TOOL } from "@claritylabs-inc/cell";
 Request generation of a Certificate of Insurance for a specific policy.
 
 ```typescript
-import { COI_GENERATION_TOOL } from "@claritylabs-inc/cell";
+import { COI_GENERATION_TOOL } from "@claritylabs-inc/cl-sdk";
 ```
 
 **Input schema:**
@@ -45,7 +45,7 @@ import { COI_GENERATION_TOOL } from "@claritylabs-inc/cell";
 Compare coverages across two or more insurance documents.
 
 ```typescript
-import { COVERAGE_COMPARISON_TOOL } from "@claritylabs-inc/cell";
+import { COVERAGE_COMPARISON_TOOL } from "@claritylabs-inc/cl-sdk";
 ```
 
 **Input schema:**
@@ -60,7 +60,7 @@ import { COVERAGE_COMPARISON_TOOL } from "@claritylabs-inc/cell";
 Import all tools as an array:
 
 ```typescript
-import { AGENT_TOOLS } from "@claritylabs-inc/cell";
+import { AGENT_TOOLS } from "@claritylabs-inc/cl-sdk";
 
 // AGENT_TOOLS = [DOCUMENT_LOOKUP_TOOL, COI_GENERATION_TOOL, COVERAGE_COMPARISON_TOOL]
 ```
@@ -68,7 +68,7 @@ import { AGENT_TOOLS } from "@claritylabs-inc/cell";
 ## Integration example
 
 ```typescript
-import { AGENT_TOOLS, buildAgentSystemPrompt } from "@claritylabs-inc/cell";
+import { AGENT_TOOLS, buildAgentSystemPrompt } from "@claritylabs-inc/cl-sdk";
 import { generateText } from "ai";
 
 const systemPrompt = buildAgentSystemPrompt(ctx);
@@ -104,7 +104,7 @@ for (const call of toolCalls) {
 ## ToolDefinition type
 
 ```typescript
-import type { ToolDefinition } from "@claritylabs-inc/cell";
+import type { ToolDefinition } from "@claritylabs-inc/cl-sdk";
 
 interface ToolDefinition {
   name: string;

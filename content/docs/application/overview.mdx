@@ -5,14 +5,14 @@ description: Prompt builders for insurance application detection, field extracti
 
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 
-Cell provides prompt builders for every stage of insurance application processing — from detecting application forms to filling completed PDFs.
+CL-0 SDK provides prompt builders for every stage of insurance application processing — from detecting application forms to filling completed PDFs.
 
 ## Application detection
 
 Classify whether a PDF is an insurance application form:
 
 ```typescript
-import { APPLICATION_CLASSIFY_PROMPT } from "@claritylabs-inc/cell";
+import { APPLICATION_CLASSIFY_PROMPT } from "@claritylabs-inc/cl-sdk";
 
 // Use as a prompt with any model + the PDF
 const response = await generateText({
@@ -32,7 +32,7 @@ const response = await generateText({
 Extract all fillable fields from an application form:
 
 ```typescript
-import { buildFieldExtractionPrompt } from "@claritylabs-inc/cell";
+import { buildFieldExtractionPrompt } from "@claritylabs-inc/cl-sdk";
 
 const prompt = buildFieldExtractionPrompt();
 // Returns a prompt that extracts fields as structured data:
@@ -44,7 +44,7 @@ const prompt = buildFieldExtractionPrompt();
 Match extracted fields against known business context to pre-populate answers:
 
 ```typescript
-import { buildAutoFillPrompt } from "@claritylabs-inc/cell";
+import { buildAutoFillPrompt } from "@claritylabs-inc/cl-sdk";
 
 const prompt = buildAutoFillPrompt(fields, businessContext);
 ```
@@ -54,7 +54,7 @@ const prompt = buildAutoFillPrompt(fields, businessContext);
 Organize unfilled fields into topic-based batches for asking the user:
 
 ```typescript
-import { buildQuestionBatchPrompt } from "@claritylabs-inc/cell";
+import { buildQuestionBatchPrompt } from "@claritylabs-inc/cl-sdk";
 
 const prompt = buildQuestionBatchPrompt(unfilledFields);
 // Groups fields by topic (e.g., "Company Information", "Loss History")
@@ -65,7 +65,7 @@ const prompt = buildQuestionBatchPrompt(unfilledFields);
 Parse free-text replies back into structured field values:
 
 ```typescript
-import { buildAnswerParsingPrompt } from "@claritylabs-inc/cell";
+import { buildAnswerParsingPrompt } from "@claritylabs-inc/cl-sdk";
 
 const prompt = buildAnswerParsingPrompt(questions, userReply);
 ```
@@ -75,7 +75,7 @@ const prompt = buildAnswerParsingPrompt(questions, userReply);
 Generate batch emails asking users for missing information:
 
 ```typescript
-import { buildBatchEmailGenerationPrompt } from "@claritylabs-inc/cell";
+import { buildBatchEmailGenerationPrompt } from "@claritylabs-inc/cl-sdk";
 
 const prompt = buildBatchEmailGenerationPrompt(batch, context);
 ```
@@ -85,7 +85,7 @@ const prompt = buildBatchEmailGenerationPrompt(batch, context);
 Determine what a user's reply to an application question means:
 
 ```typescript
-import { buildReplyIntentClassificationPrompt } from "@claritylabs-inc/cell";
+import { buildReplyIntentClassificationPrompt } from "@claritylabs-inc/cl-sdk";
 
 const prompt = buildReplyIntentClassificationPrompt(userReply, currentBatch);
 ```
@@ -95,7 +95,7 @@ const prompt = buildReplyIntentClassificationPrompt(userReply, currentBatch);
 Generate explanations for complex insurance form fields:
 
 ```typescript
-import { buildFieldExplanationPrompt } from "@claritylabs-inc/cell";
+import { buildFieldExplanationPrompt } from "@claritylabs-inc/cl-sdk";
 
 const prompt = buildFieldExplanationPrompt(field);
 ```
@@ -105,7 +105,7 @@ const prompt = buildFieldExplanationPrompt(field);
 Generate a summary of all filled fields for user confirmation before PDF generation:
 
 ```typescript
-import { buildConfirmationSummaryPrompt } from "@claritylabs-inc/cell";
+import { buildConfirmationSummaryPrompt } from "@claritylabs-inc/cl-sdk";
 
 const prompt = buildConfirmationSummaryPrompt(filledFields);
 ```
@@ -117,7 +117,7 @@ Map filled field values back to PDF form coordinates for filling:
 <Tabs items={["AcroForm (fillable PDFs)", "Flat PDFs"]}>
   <Tab value="AcroForm (fillable PDFs)">
     ```typescript
-    import { buildAcroFormMappingPrompt } from "@claritylabs-inc/cell";
+    import { buildAcroFormMappingPrompt } from "@claritylabs-inc/cl-sdk";
 
     const prompt = buildAcroFormMappingPrompt(filledFields, acroFormFields);
     // Maps answers to AcroForm field names
@@ -125,7 +125,7 @@ Map filled field values back to PDF form coordinates for filling:
   </Tab>
   <Tab value="Flat PDFs">
     ```typescript
-    import { buildFlatPdfMappingPrompt } from "@claritylabs-inc/cell";
+    import { buildFlatPdfMappingPrompt } from "@claritylabs-inc/cl-sdk";
 
     const prompt = buildFlatPdfMappingPrompt(filledFields, pageInfo);
     // Maps answers to percentage-based page coordinates
@@ -138,7 +138,7 @@ Map filled field values back to PDF form coordinates for filling:
 Fill fields by looking up values from existing documents:
 
 ```typescript
-import { buildLookupFillPrompt } from "@claritylabs-inc/cell";
+import { buildLookupFillPrompt } from "@claritylabs-inc/cl-sdk";
 
 const prompt = buildLookupFillPrompt(fields, documents);
 ```

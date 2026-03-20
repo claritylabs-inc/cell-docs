@@ -6,11 +6,11 @@ description: Configure which AI models run each pipeline pass
 import { Callout } from "fumadocs-ui/components/callout";
 import { Tab, Tabs } from "fumadocs-ui/components/tabs";
 
-Cell's extraction pipeline uses different models for different passes. You can use the defaults, a single model for everything, or assign models per role.
+CL-0 SDK's extraction pipeline uses different models for different passes. You can use the defaults, a single model for everything, or assign models per role.
 
 ## Default configuration
 
-If you don't pass a `models` option, Cell uses Anthropic defaults via `createDefaultModelConfig()`:
+If you don't pass a `models` option, CL-0 SDK uses Anthropic defaults via `createDefaultModelConfig()`:
 
 | Role | Default Model | Purpose |
 |------|--------------|---------|
@@ -30,7 +30,7 @@ Use the same model for every pass:
 
 ```typescript
 import { createAnthropic } from "@ai-sdk/anthropic";
-import { extractFromPdf, createUniformModelConfig } from "@claritylabs-inc/cell";
+import { extractFromPdf, createUniformModelConfig } from "@claritylabs-inc/cl-sdk";
 
 const anthropic = createAnthropic();
 const { extracted } = await extractFromPdf(pdfBase64, {
@@ -44,7 +44,7 @@ Assign a different model to each pipeline role:
 
 ```typescript
 import { createAnthropic } from "@ai-sdk/anthropic";
-import { extractFromPdf, type ModelConfig } from "@claritylabs-inc/cell";
+import { extractFromPdf, type ModelConfig } from "@claritylabs-inc/cl-sdk";
 
 const anthropic = createAnthropic();
 const models: ModelConfig = {
@@ -60,13 +60,13 @@ const { extracted } = await extractFromPdf(pdfBase64, { models });
 
 ## Non-Anthropic providers
 
-Cell works with any provider that implements the Vercel AI SDK `LanguageModel` interface:
+CL-0 SDK works with any provider that implements the Vercel AI SDK `LanguageModel` interface:
 
 <Tabs items={["OpenAI", "Google"]}>
   <Tab value="OpenAI">
     ```typescript
     import { createOpenAI } from "@ai-sdk/openai";
-    import { extractFromPdf, createUniformModelConfig } from "@claritylabs-inc/cell";
+    import { extractFromPdf, createUniformModelConfig } from "@claritylabs-inc/cl-sdk";
 
     const openai = createOpenAI();
     const { extracted } = await extractFromPdf(pdfBase64, {
@@ -78,7 +78,7 @@ Cell works with any provider that implements the Vercel AI SDK `LanguageModel` i
   <Tab value="Google">
     ```typescript
     import { createGoogleGenerativeAI } from "@ai-sdk/google";
-    import { extractFromPdf, createUniformModelConfig } from "@claritylabs-inc/cell";
+    import { extractFromPdf, createUniformModelConfig } from "@claritylabs-inc/cl-sdk";
 
     const google = createGoogleGenerativeAI();
     const { extracted } = await extractFromPdf(pdfBase64, {
@@ -95,7 +95,7 @@ Cell works with any provider that implements the Vercel AI SDK `LanguageModel` i
 
 ## Token limits
 
-Cell sets per-role token limits based on the task, not the provider:
+CL-0 SDK sets per-role token limits based on the task, not the provider:
 
 | Role | Max Output Tokens |
 |------|------------------|

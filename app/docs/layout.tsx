@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { source } from "@/lib/source";
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 import { VersionSelect } from "@/components/version-select";
-import { CURRENT_VERSION } from "@/lib/versions";
+import { CURRENT_VERSION, MAJOR_VERSION } from "@/lib/versions";
 
 function LogoIcon() {
   return (
@@ -37,7 +37,7 @@ const baseOptions: BaseLayoutProps = {
     title: (
       <>
         <LogoIcon />
-        <span className="font-medium tracking-tight">Cell</span>
+        <span className="font-medium tracking-tight">CL-{MAJOR_VERSION} SDK</span>
         <span
           className="text-xs text-fd-muted-foreground font-normal ml-1"
           style={{ opacity: 0.6 }}
@@ -48,7 +48,7 @@ const baseOptions: BaseLayoutProps = {
     ),
   },
   links: [],
-  githubUrl: "https://github.com/claritylabs-inc/cell/pkgs/npm/cell",
+  githubUrl: "https://github.com/claritylabs-inc/cl-sdk/pkgs/npm/cl-sdk",
 };
 
 export default function Layout({ children }: { children: ReactNode }) {

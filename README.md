@@ -1,6 +1,6 @@
-# Cell Documentation
+# CL-SDK Documentation
 
-Documentation site for [`@claritylabs-inc/cell`](https://github.com/clarity-labs/cell) — the shared intelligence layer for AI working with insurance.
+Documentation site for [`@claritylabs-inc/cl-sdk`](https://github.com/claritylabs-inc/cl-sdk) — the shared intelligence layer for AI working with insurance.
 
 ## Development
 

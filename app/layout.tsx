@@ -6,27 +6,27 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://cell.claritylabs.inc"),
+  metadataBase: new URL("https://cl-sdk.claritylabs.inc"),
   title: {
     template: "%s",
-    default: "Cell from Clarity Labs",
+    default: "CL-0 SDK",
   },
   description:
-    "Cell from Clarity Labs is an SDK for AI agents working with insurance.",
+    "CL-0 SDK is an SDK for AI agents working with insurance.",
   icons: "/favicon.svg",
   openGraph: {
-    title: "Cell from Clarity Labs",
+    title: "CL-0 SDK",
     description:
-      "Cell from Clarity Labs is an SDK for AI agents working with insurance.",
+      "CL-0 SDK is an SDK for AI agents working with insurance.",
     type: "website",
-    siteName: "Cell from Clarity Labs",
-    url: "https://cell.claritylabs.inc",
+    siteName: "CL-0 SDK",
+    url: "https://cl-sdk.claritylabs.inc",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cell from Clarity Labs",
+    title: "CL-0 SDK",
     description:
-      "Cell from Clarity Labs is an SDK for AI agents working with insurance.",
+      "CL-0 SDK is an SDK for AI agents working with insurance.",
   },
 };
 
