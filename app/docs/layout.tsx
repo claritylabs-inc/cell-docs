@@ -42,7 +42,7 @@ const baseOptions: BaseLayoutProps = {
           className="text-xs text-fd-muted-foreground font-normal ml-1"
           style={{ opacity: 0.6 }}
         >
-          v{CURRENT_VERSION}
+          CL-{CURRENT_VERSION}
         </span>
       </>
     ),

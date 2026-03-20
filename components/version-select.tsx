@@ -17,7 +17,7 @@ export function VersionSelect() {
   if (!mounted) {
     return (
       <div className="flex w-full items-center justify-between rounded-lg border bg-fd-secondary/50 px-2.5 py-1.5 text-sm font-medium text-fd-muted-foreground">
-        v{CURRENT_VERSION}
+        CL-{CURRENT_VERSION}
         <ChevronDownIcon className="size-3.5 text-fd-muted-foreground" />
       </div>
     );
@@ -26,7 +26,7 @@ export function VersionSelect() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex w-full items-center justify-between rounded-lg border bg-fd-secondary/50 px-2.5 py-1.5 text-sm font-medium text-fd-muted-foreground outline-none select-none transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground">
-        v{CURRENT_VERSION}
+        CL-{CURRENT_VERSION}
         <ChevronDownIcon className="size-3.5 text-fd-muted-foreground" />
       </DropdownMenuTrigger>
       <DropdownMenuContent sideOffset={4} className="min-w-[var(--anchor-width)]">

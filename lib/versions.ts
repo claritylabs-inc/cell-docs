@@ -9,7 +9,7 @@ const BASE_URL =
 export const versions = [
   {
     version: CURRENT_VERSION,
-    label: `CL-${MAJOR_VERSION} (latest)`,
+    label: `CL-${CURRENT_VERSION} (latest)`,
     url: `${BASE_URL}/v${CURRENT_VERSION}`,
   },
 ];
