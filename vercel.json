@@ -1,3 +1,5 @@
 {
-  "rewrites": []
+  "rewrites": [
+    { "source": "/docs/v0.2/:path*", "destination": "https://docs-git-v02-claritylabs.vercel.app/docs/:path*" }
+  ]
 }
