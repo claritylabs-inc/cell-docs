@@ -185,7 +185,7 @@ jobs:
           npx tsx mcp/build-docs.ts
           cd mcp
           npm version ${{ steps.semver.outputs.version }} --no-git-tag-version --allow-same-version
-          npm publish
+          npm publish || echo "Version already published, skipping"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
